@@ -1,0 +1,26 @@
+>>>>>>>>DDL Nano<<<<<<<<
+CD (caminho do programa) 
+REGSVR32 ClassesBDNano.DLL
+REGSVR32 WA_FotoAudio.ocx
+REGSVR32 WA_MapaAmplitudeNano.ocx
+REGSVR32 WA_Paleta.ocx
+REGSVR32 WA_T1s20canais.ocx
+REGSVR32 WAGrafResumoNano.ocx
+REGSVR32 iCelera_Oximetro.ocx
+
+>>>>>>>>DDL iblue<<<<<<<<
+CD (caminho do programa)
+REGSVR32 ClassesBDiBlue.dll
+REGSVR32 WA_FotoAudio.ocx
+REGSVR32 WA_MapaAmplitudeiBlue.ocx
+REGSVR32 WA_Paleta.ocx
+REGSVR32 WA_T1s20canais.ocx
+REGSVR32 WAGrafResumoiBlue.ocx
+
+>>>>>>>>DDL FATSPOLI<<<<<<<<
+REGSVR32  ClassesBD.dll
+REGSVR32 WAGrafResumo.ocx
+REGSVR32 WA_T1s20canais.ocx
+REGSVR32 WA_Paleta.ocx
+REGSVR32 WA_MapaAmplitude.ocx
+REGSVR32 WA_FotoAudio.ocx

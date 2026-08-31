@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manual Interativo de Suporte Técnico e Operacional iCelera">
+  <title>Manual de Suporte Técnico | iCelera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    
+    <!-- Topbar com Botão Hamburger -->
+    <header class="topbar">
+      <div class="brand">
+        <button class="icon-btn hamburger" id="menuBtn" aria-label="Abrir menu">☰</button>
+        <a href="#inicio" aria-label="Voltar ao início">
+          <img src="assets/logo-icelera.jpg" alt="Logo iCelera" class="logo">
+        </a>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeBtn" title="Alternar modo escuro">◐</button>
+        <button class="icon-btn" id="fontBtn" title="Aumentar tamanho do texto">A+</button>
+      </div>
+    </header>
+
+    <!-- Sidebar Oculta (Off-canvas) para os Dropdowns -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Índice do Manual</span>
+        <button class="icon-btn close-sidebar" id="menuClose" aria-label="Fechar menu">✕</button>
+      </div>
+      <nav id="sideNav"></nav>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <main class="main-content" id="mainContent">
+      <section class="hero" id="inicio">
+        <div class="hero-copy">
+          <span class="eyebrow">MANUAL OFICIAL</span>
+          <h1>Manual de<br><strong>Suporte Técnico</strong><br>& Operacional</h1>
+          <p>Guia definitivo de procedimentos, diagnósticos e resolução de incidentes.</p>
+
+          <div class="hero-features">
+            <div><span>⚙</span><b></b></div>
+            <div><span>◉</span><b></b></div>
+            <div><span>✓</span><b></b></div>
+            <div><span>☊</span><b></b></div>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="pulse-ring"></div>
+          <div class="hero-orb"><small>🗐</small></div>
+          <span class="float-dot dot-1"></span>
+          <span class="float-dot dot-2"></span>
+          <span class="float-dot dot-3"></span>
+        </div>
+      </section>
+
+      <section class="quick-panel">
+        <div>
+          <span class="eyebrow">CENTRAL DE SUPORTE</span>
+          <h2>O que aconteceu?</h2>
+          <p>Pesquise um erro, equipamento ou procedimento.</p>
+        </div>
+        <div class="search-box">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="Ex.: erro 380, ping, cartão SD, oxímetro...">
+        </div>
+      </section>
+
+      <section class="navigation-section">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">ACESSO RÁPIDO</span>
+            <h2>Escolha uma seção</h2>
+          </div>
+          <span class="result-count" id="resultCount">9 seções</span>
+        </div>
+        <div class="section-grid" id="sectionGrid"></div>
+      </section>
+
+      <section class="detail-section hidden" id="detailSection">
+        <button class="back-btn" id="backBtn">← Voltar para as seções</button>
+        <div id="detailContent"></div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <strong>Precisa de ajuda?</strong>
+        <span>Nossa equipe está pronta para apoiar.</span>
+      </div>
+      <div>
+        <strong>Suporte técnico diurno e noturno</strong>
+        <span>Atendimento ágil e especializado.</span>
+      </div>
+      <div class="footer-brand">
+        <img src="assets/logo-icelera.jpg" alt="iCelera">
+      </div>
+    </footer>
+
+    <!-- Widget do Chatbot IA (Gemini) -->
+    <div class="ai-chat-widget">
+      <button class="chat-toggle" id="chatToggle" aria-label="Abrir Assistente IA">✦︎</button>
+
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-header">
+          <div>
+            <h4>Assistente iCelera</h4>
+            <span class="status">● Online</span>
+          </div>
+          <button class="close-chat" id="closeChat">✕</button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+          <div class="message ai-message">
+            Olá! Sou a IA de suporte da iCelera. Descreva o erro ou equipamento que eu guiarei você para a solução.
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" id="aiInput" placeholder="Ex: O oxímetro está piscando..." autocomplete="off">
+          <button id="sendBtn" class="send-btn">➤</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
