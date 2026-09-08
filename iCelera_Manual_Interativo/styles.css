@@ -1086,3 +1086,15 @@ body.locked .app-shell {
   filter: none !important;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
 }
+
+/* Remove o blur e libera a página inteira quando o body não estiver mais locked */
+body:not(.locked) .app-shell {
+  filter: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+body:not(.locked) {
+  overflow: auto !important;
+  background-color: var(--bg) !important;
+}
