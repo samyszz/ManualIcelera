@@ -843,19 +843,39 @@ footer span { color: var(--muted); font-size: 14px; margin-top: 5px; }
 .action-btn.edit { color: var(--blue); }
 .action-btn:hover { background: white; transform: scale(1.1); }
 /* Bloqueio de navegação enquanto não logado */
+/* Bloqueio de navegação enquanto não logado */
 body.locked {
   overflow: hidden;
 }
 
-.app-shell {
-  transition: filter 0.3s ease;
-}
-
+/* Aplica o blur apenas no conteúdo principal, NUNCA nos modais */
 body.locked .app-shell {
   filter: blur(8px);
-  pointer-events: none; /* Desativa cliques no fundo */
+  pointer-events: none; 
 }
 
+/* Garante que os modais fiquem completamente isolados e nítidos */
+.modal-overlay {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4); /* Fundo escurecido elegante */
+  backdrop-filter: none; /* Remove qualquer blur herdado */
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0; 
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1; 
+  pointer-events: auto;
+}
 /* O modal precisa ficar acima do blur */
 #loginModal {
   pointer-events: auto;
