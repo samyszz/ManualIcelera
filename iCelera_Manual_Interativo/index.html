@@ -134,7 +134,7 @@
       </div>
     </div>
 
-    <!-- Modal de Login (Trava de Acesso) -->
+<!-- Modal de Login (Fora do app-shell para não borrar) -->
     <div class="modal-overlay active" id="loginModal">
       <div class="modal-content soft-modal">
         <h3>Bem vindo á iCelera!</h3>
@@ -214,6 +214,30 @@
               <option value="🔒">🔒 (Segurança / Acesso)</option>
             </select>
           </div>
+
+          <!-- Campos para Nova Subseção -->
+          <div id="procedureFields" class="hidden">
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Selecione a Seção Destino:</label>
+            <select id="targetSectionSelect" class="soft-input" style="height: 50px; cursor: pointer;"></select>
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Título da Subseção:</label>
+            <input type="text" id="newProcTitle" placeholder="Ex.: 1.7 — Configuração de Switch" class="soft-input">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Introdução / Resumo:</label>
+            <input type="text" id="newProcIntro" placeholder="Ex.: Parâmetros iniciais de porta." class="soft-input">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Passos (um por linha):</label>
+            <textarea id="newProcSteps" placeholder="Passo 1&#10;Passo 2&#10;Passo 3" class="soft-input" style="height: 100px; resize: none; padding-top: 12px;"></textarea>
+          </div>
+
+          <button class="primary-btn" id="saveNewItemBtn" style="margin-top: 10px;">Salvar no Manual</button>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- Fim da div .app-shell -->
+
+
 
           <!-- Campos para Nova Subseção -->
           <div id="procedureFields" class="hidden">
