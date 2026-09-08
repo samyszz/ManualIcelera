@@ -1056,3 +1056,33 @@ body.locked .app-shell {
   filter: none !important;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
 }
+
+/* CORREÇÃO DEFINITIVA DO ESTADO DO MODAL DE LOGIN */
+
+/* Remove regras conflitantes anteriores e deixa o comportamento padrão do modal valer */
+#loginModal {
+  background: rgba(11, 17, 32, 0.85) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Quando estiver ativo (não logado), fica visível na frente */
+#loginModal.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Quando o JS remove a classe active (após o login), ele some completamente e libera os cliques */
+#loginModal:not(.active) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  display: none !important;
+}
+
+/* Caixa interna totalmente sólida e nítida */
+#loginModal .soft-modal {
+  background: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+}
