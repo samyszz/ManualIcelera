@@ -1098,3 +1098,47 @@ body:not(.locked) {
   overflow: auto !important;
   background-color: var(--bg) !important;
 }
+
+
+/* ============================================
+   PATCH: corrige o blur do modal de login
+   (cola no FINAL do arquivo styles.css)
+============================================ */
+body.locked .app-shell {
+  filter: blur(6px) !important;
+  opacity: 0.4 !important;
+  pointer-events: none !important;
+}
+
+body:not(.locked) .app-shell {
+  filter: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#loginModal {
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(11, 17, 32, 0.85) !important;
+}
+
+#loginModal.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  display: flex !important;
+}
+
+#loginModal:not(.active) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  display: none !important;
+}
+
+#loginModal .soft-modal {
+  background: #ffffff !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  opacity: 1 !important;
+}
