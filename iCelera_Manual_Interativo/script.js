@@ -1013,3 +1013,8 @@ document.getElementById('uploadMedia').addEventListener('change', (e) => {
       openGallery(currentSectionForGallery);
   }
 });
+
+// Abre o modal de login automaticamente assim que o site é carregado
+window.addEventListener('DOMContentLoaded', () => {
+  loginModal.classList.add('active');
+});
