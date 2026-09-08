@@ -883,8 +883,8 @@ if (chatToggle && chatPanel) {
 // AUTENTICAÇÃO E GALERIA COM FIREBASE
 // ==========================================
 const roleEmails = {
-  tecnico: "tecnico@icelera.com",
-  coordenador: "coordenador@icelera.com"
+  tecnico: "suporte.icelera3@icelera.com.br",
+  coordenador: "coordenador.suporte@icelera.com.br"
 };
 
 let currentUserRole = null;
