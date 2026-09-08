@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // ==========================================
 // CONFIGURAÇÃO FIREBASE
@@ -16,9 +17,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const storage = getStorage(app); // Inicializa o Storage
 
 // ==========================================
-// BASE DE DADOS (SEÇÕES DO MANUAL)
+// BASE DE DADOS LOCAL (SEÇÕES DO MANUAL)
 // ==========================================
 const sections = [
   {
@@ -541,11 +543,9 @@ menuBtn?.addEventListener("click", toggleMenu);
 menuCloseBtn?.addEventListener("click", toggleMenu);
 overlayEl?.addEventListener("click", toggleMenu);
 
-// Renderização do Menu Lateral
 function renderSideNav() {
   if (!sideNav) return;
   sideNav.innerHTML = '';
-  
   sections.forEach(s => {
     const dropdown = document.createElement('div');
     dropdown.className = 'dropdown';
@@ -624,7 +624,6 @@ function renderSideNav() {
   });
 }
 
-// Renderização dos Cards Principais
 function cardTemplate(s) {
   return `
     <article class="section-card">
@@ -701,7 +700,6 @@ function openSection(id) {
       </article>
     `).join("")}
   `;
-
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -715,7 +713,6 @@ function closeSection() {
 
 document.getElementById("backBtn")?.addEventListener("click", closeSection);
 
-// Busca e Tema
 searchInput?.addEventListener("input", e => {
   const query = e.target.value.trim().toLowerCase();
   if (!query) {
@@ -754,7 +751,7 @@ renderSideNav();
 renderCards();
 
 // ==========================================
-// AUTENTICAÇÃO E GALERIA COM FIREBASE (COM TRAVA DE SEGURANÇA)
+// AUTENTICAÇÃO
 // ==========================================
 const roleEmails = {
   tecnico: "suporte.icelera3@icelera.com.br",
@@ -771,7 +768,6 @@ const logoutBtn = document.getElementById('logoutBtn');
 const submitLoginBtn = document.getElementById('submitLoginBtn');
 const loginError = document.getElementById('loginError');
 
-// Controle das abas do Modal
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -780,7 +776,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// Ação de Login
 async function authenticate() {
   const pwd = document.getElementById('loginPassword')?.value;
   const email = roleEmails[currentLoginTab];
@@ -819,17 +814,13 @@ document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') authenticate();
 });
 
-// O Observador (Força a Liberação de Cliques)
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUserRole = user.email.includes("coordenador") ? "coordenador" : "tecnico";
-    
-    // Libera a tela
     document.body.classList.remove('locked');
     
     if (loginModal) {
         loginModal.classList.remove('active');
-        // GARANTIA que o fundo invisível saia da frente:
         loginModal.style.pointerEvents = 'none'; 
     }
     
@@ -844,17 +835,13 @@ onAuthStateChanged(auth, (user) => {
     }
     loginError?.classList.add('hidden');
 
-    if (currentSectionForGallery !== null) {
-      openGallery(currentSectionForGallery);
-    }
   } else {
-    // Trava a tela
     currentUserRole = null;
     document.body.classList.add('locked');
     
     if (loginModal) {
         loginModal.classList.add('active');
-        loginModal.style.pointerEvents = 'auto'; // Reativa cliques apenas pro modal
+        loginModal.style.pointerEvents = 'auto'; 
     }
     
     logoutBtn?.classList.add('hidden');
@@ -866,18 +853,17 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Logout (Forçando o recarregamento total da página)
 logoutBtn?.addEventListener('click', async () => {
   try {
       await signOut(auth);
-      window.location.reload(); // Recarrega a página para evitar bugs
+      window.location.reload(); 
   } catch(err) {
       console.error("Erro ao sair:", err);
   }
 });
 
 // ==========================================
-// FUNÇÕES DA GALERIA 
+// UPLOAD E DOWNLOAD REAL (FIREBASE STORAGE)
 // ==========================================
 window.requestGalleryAccess = function(sectionId) {
   currentSectionForGallery = sectionId;
@@ -887,11 +873,12 @@ window.requestGalleryAccess = function(sectionId) {
 document.getElementById('closeGalleryBtn')?.addEventListener('click', () => {
   if (galleryModal) {
       galleryModal.classList.remove('active');
-      galleryModal.style.pointerEvents = 'none'; // Garante que a galeria não bloqueie a tela
+      galleryModal.style.pointerEvents = 'none';
   }
 });
 
-function openGallery(sectionId) {
+// Busca os arquivos locais e os que estão na nuvem
+async function openGallery(sectionId) {
   const section = sections.find(s => s.id === sectionId);
   if (!section) return;
 
@@ -907,88 +894,151 @@ function openGallery(sectionId) {
   }
 
   if (grid) {
-      if (!section.media || section.media.length === 0) {
-          grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
-                              <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
-                              <p style="color:var(--muted);">Nenhuma mídia disponível para esta seção.</p>
-                            </div>`;
-      } else {
-          grid.innerHTML = section.media.map((file, index) => {
-              const extension = file.split('.').pop().toLowerCase();
-              const isVideo = ['mp4', 'webm', 'mov'].includes(extension);
-              const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
-              const path = `assets/tutorial_S${section.id}/${file}`;
-              
-              let mediaElement = '';
-              if (isVideo) {
-                mediaElement = `<video src="${path}" controls preload="metadata"></video>`;
-              } else if (isImage) {
-                mediaElement = `<img src="${path}" alt="${file}" loading="lazy">`;
-              } else {
-                mediaElement = `<div style="height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-soft); color: var(--primary-dark);">
-                                  <span style="font-size:40px; margin-bottom: 5px;">📄</span>
-                                  <span style="font-size: 12px; font-weight: bold;">Documento</span>
-                                </div>`;
-              }
-
-              const actions = currentUserRole === 'coordenador' 
-                  ? `<div class="media-actions">
-                       <button class="action-btn edit" title="Editar nome" onclick="window.editMedia(${section.id}, ${index})">✎</button>
-                       <button class="action-btn" title="Excluir" onclick="window.deleteMedia(${section.id}, ${index})">🗑</button>
-                     </div>` 
-                  : '';
-
-              return `
-              <div class="media-card">
-                ${mediaElement}
-                <div class="media-info">
-                  <div class="media-name" title="${file}">${file}</div>
-                </div>
-                ${actions}
-              </div>`;
-          }).join('');
-      }
-  }
-  
-  if (galleryModal) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--primary-dark);">
+                          <p>Carregando mídia da nuvem... ⏳</p>
+                        </div>`;
+      
       galleryModal.classList.add('active');
-      galleryModal.style.pointerEvents = 'auto'; // Ativa cliques apenas quando a galeria abrir
+      galleryModal.style.pointerEvents = 'auto';
+
+      try {
+          // 1. Prepara arquivos locais (Hardcoded no array)
+          const localMedia = (section.media || []).map(file => {
+              return { name: file, url: `assets/tutorial_S${sectionId}/${file}`, isCloud: false };
+          });
+
+          // 2. Busca arquivos na nuvem no Firebase Storage
+          let cloudMedia = [];
+          try {
+              const folderRef = storageRef(storage, `secao_${sectionId}`);
+              const cloudFiles = await listAll(folderRef);
+              
+              // Mapeia todas as promessas de URL para buscar simultaneamente
+              const cloudPromises = cloudFiles.items.map(async (itemRef) => {
+                  const url = await getDownloadURL(itemRef);
+                  return { name: itemRef.name, url: url, isCloud: true };
+              });
+              
+              cloudMedia = await Promise.all(cloudPromises);
+          } catch(e) {
+              console.log("Pasta na nuvem ainda não existe ou está vazia para esta seção.");
+          }
+
+          // 3. Junta as duas listas
+          const allMedia = [...localMedia, ...cloudMedia];
+
+          if (allMedia.length === 0) {
+              grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
+                                  <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
+                                  <p style="color:var(--muted);">Nenhuma mídia disponível para esta seção.</p>
+                                </div>`;
+          } else {
+              grid.innerHTML = allMedia.map((fileObj, index) => {
+                  const extension = fileObj.name.split('.').pop().toLowerCase();
+                  const isVideo = ['mp4', 'webm', 'mov'].includes(extension);
+                  const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
+                  
+                  let mediaElement = '';
+                  if (isVideo) {
+                    mediaElement = `<video src="${fileObj.url}" controls preload="metadata"></video>`;
+                  } else if (isImage) {
+                    mediaElement = `<img src="${fileObj.url}" alt="${fileObj.name}" loading="lazy">`;
+                  } else {
+                    mediaElement = `<div style="height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-soft); color: var(--primary-dark);">
+                                      <a href="${fileObj.url}" target="_blank" style="text-decoration:none; color:inherit; text-align:center;">
+                                        <span style="font-size:40px; margin-bottom: 5px; display:block;">📄</span>
+                                        <span style="font-size: 12px; font-weight: bold;">Baixar Documento</span>
+                                      </a>
+                                    </div>`;
+                  }
+
+                  const actions = currentUserRole === 'coordenador' 
+                      ? `<div class="media-actions">
+                           <button class="action-btn" title="Excluir" onclick="window.deleteMedia(${section.id}, '${fileObj.name}', ${fileObj.isCloud})">🗑</button>
+                         </div>` 
+                      : '';
+
+                  return `
+                  <div class="media-card">
+                    ${mediaElement}
+                    <div class="media-info">
+                      <div class="media-name" title="${fileObj.name}">
+                         ${fileObj.isCloud ? '☁️ ' : ''}${fileObj.name}
+                      </div>
+                    </div>
+                    ${actions}
+                  </div>`;
+              }).join('');
+          }
+      } catch (error) {
+          grid.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar galeria.</p>`;
+          console.error(error);
+      }
   }
 }
 
-window.deleteMedia = function(sectionId, mediaIndex) {
-  if (confirm("Coordenador: Tem certeza que deseja excluir este arquivo permanentemente?")) {
-      const section = sections.find(s => s.id === sectionId);
-      if (section) {
-          section.media.splice(mediaIndex, 1);
-          openGallery(sectionId); 
-      }
-  }
-};
-
-window.editMedia = function(sectionId, mediaIndex) {
-  const section = sections.find(s => s.id === sectionId);
-  if (!section) return;
-  const newName = prompt("Coordenador: Digite o novo nome do arquivo:", section.media[mediaIndex]);
-  if (newName && newName.trim() !== "") {
-      section.media[mediaIndex] = newName.trim();
-      openGallery(sectionId); 
-  }
-};
-
-document.getElementById('uploadMedia')?.addEventListener('change', (e) => {
+// Upload físico de arquivos
+document.getElementById('uploadMedia')?.addEventListener('change', async (e) => {
   if(e.target.files.length > 0 && currentSectionForGallery !== null) {
-      alert(`Coordenador: Upload de ${e.target.files.length} arquivo(s) simulado com sucesso na Seção ${currentSectionForGallery}.`);
-      const section = sections.find(s => s.id === currentSectionForGallery);
-      if (section) {
-          Array.from(e.target.files).forEach(file => section.media.push(file.name));
-          openGallery(currentSectionForGallery);
+      const sectionId = currentSectionForGallery;
+      const uploadLabel = document.querySelector('label[for="uploadMedia"] span');
+      
+      try {
+          // Atualiza visual do botão para loading
+          const originalText = uploadLabel.innerHTML;
+          uploadLabel.innerHTML = "⏳ Enviando...";
+          document.getElementById('uploadMedia').disabled = true;
+
+          for (let i = 0; i < e.target.files.length; i++) {
+              const file = e.target.files[i];
+              const fileRef = storageRef(storage, `secao_${sectionId}/${file.name}`);
+              
+              await uploadBytes(fileRef, file);
+          }
+          
+          alert("Upload concluído com sucesso!");
+          openGallery(sectionId); // Recarrega a galeria
+      } catch (err) {
+          console.error("Erro no upload", err);
+          alert("Erro ao enviar o arquivo. Verifique sua conexão e tente novamente.");
+      } finally {
+          // Restaura o botão
+          uploadLabel.innerHTML = "+";
+          document.getElementById('uploadMedia').disabled = false;
+          e.target.value = ''; // Limpa o input
       }
   }
 });
 
+// Apagar arquivo físico ou local
+window.deleteMedia = async function(sectionId, fileName, isCloud) {
+  if (confirm(`Tem certeza que deseja excluir '${fileName}' permanentemente?`)) {
+      if (isCloud) {
+          try {
+              const fileRef = storageRef(storage, `secao_${sectionId}/${fileName}`);
+              await deleteObject(fileRef);
+              alert("Arquivo removido da nuvem.");
+              openGallery(sectionId); // Recarrega a tela
+          } catch(err) {
+              console.error(err);
+              alert("Erro ao excluir arquivo da nuvem.");
+          }
+      } else {
+          // Se for arquivo local do HD (array)
+          const section = sections.find(s => s.id === sectionId);
+          if (section) {
+              const index = section.media.indexOf(fileName);
+              if (index > -1) {
+                  section.media.splice(index, 1);
+                  openGallery(sectionId);
+              }
+          }
+      }
+  }
+};
+
 // ==========================================
-// INTEGRAÇÃO API GEMINI (Mantida isolada para evitar erros)
+// INTEGRAÇÃO API GEMINI
 // ==========================================
 const chatToggle = document.getElementById('chatToggle');
 const chatPanel = document.getElementById('chatPanel');
