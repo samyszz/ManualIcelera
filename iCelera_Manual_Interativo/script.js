@@ -6,6 +6,12 @@ const sections = [
     description: "Estabelecer, manter e diagnosticar a comunicação entre equipamentos iCelera e o computador.",
     keywords: ["ip", "rede", "ping", "wifi", "wi-fi", "ethernet", "chn", "vgpe", "adaptador", "conectividade"],
     highlights: ["IP estático por linha", "Teste de conectividade (Ping)", "Parâmetro CHN (K, W, C)", "Conflitos de rede", "Reboot duplo VGPE / VGPEE", "Adaptadores homologados"],
+    media: [
+      "adaptadorusbrede.mp4",
+      "CHN.mp4",
+      "Ping-BemSucedido.png",
+      "Ping-Malsucedido.png"
+    ],
     procedures: [
       { title: "1.1 — Configuração de IP Estático IPv4", intro: "Configuração da interface Ethernet para comunicação com o equipamento.", steps: [
         "Pressione Windows + R, digite ncpa.cpl e pressione Enter.",
@@ -58,6 +64,12 @@ const sections = [
     description: "Procedimentos para registro de bibliotecas e configurações do Windows.",
     keywords: ["dll", "ocx", "cmd", "regsvr32", "dep", "windows", "erro 380", "regional"],
     highlights: ["Registro NANO", "Registro iBLUE", "Registro FASTPOLI", "DEP", "Configurações regionais"],
+    media: [
+      "380.mp4",
+      "Como registrar dll 1.mp4",
+      "Como registrar dll 2.txt",
+      "DEP.mp4"
+    ],
     procedures: [
       { title: "2.1 — Registro de componentes NANO", steps: [
         "Feche o iCelera Nano.",
@@ -116,6 +128,11 @@ const sections = [
     description: "Manipulação de cartões SD, recuperação de exames e programação domiciliar.",
     keywords: ["sd", "cartão", "cartao", "bkpd", "bkpm", "dat", "mdb", "fat32", "arquivo0", "exame domiciliar", "lock"],
     highlights: ["Recuperação .bkpd / .bkpm", "Reparo do arquivo0", "Formatação FAT32", "Cartões homologados", "Reprogramação", "Trava física"],
+    media: [
+      "como_mudar_o_bkpd_bkpd.mp4",
+      "formatar_cartao.mp4",
+      "TRAVALOCK.mp4"
+    ],
     procedures: [
       { title: "3.1 — Recuperação de exames corrompidos", steps: [
         "Feche o software iCelera.",
@@ -168,6 +185,11 @@ const sections = [
     description: "Correção de inconformidades em laudos, hipnogramas e análise automática.",
     keywords: ["laudo", "hipnograma", "gpv", "boa noite", "bom dia", "access", "tbl_dadosexame", "respiratório"],
     highlights: ["Arquivo .GPV", "Boa Noite / Bom Dia", "tbl_DadosExame", "Tipo 3", "Microsoft Word"],
+    media: [
+      "alterartipoexame.mp4",
+      "bomdiaenoite.mp4",
+      "gpverecalcular.mp4"
+    ],
     procedures: [
       { title: "4.1 — Eliminar .GPV e recalcular análise", steps: [
         "Feche o exame.",
@@ -211,6 +233,7 @@ const sections = [
     description: "Guia de resolução rápida para os códigos de erro mais frequentes.",
     keywords: ["erro 11", "erro 6", "erro 9", "erro 76", "erro 380", "erro 94", "erro 64", "e_fail", "overflow", "division by zero"],
     highlights: ["Erro 11", "Erro 6", "Erro 9", "Erro 76", "Erro 380", "Erros 94 e 64", "E_FAIL"],
+    media: [],
     procedures: [
       { title: "5.1 — Erro 11: Division by zero", intro: "Causa indicada no manual: taxa de amostragem zerada no MDB ou canal duplicado.", steps: [
         "Abra [Exame].MDB no Access e a tabela tbl_Canais_Adquiridos.",
@@ -263,6 +286,7 @@ const sections = [
     description: "Câmera, oxímetro, FastPoli, CPAP e módulos de comunicação.",
     keywords: ["camera", "vídeo", "vpsg", "codec", "fastpoli", "fastmap", "cpap", "oxímetro", "com", "resmed"],
     highlights: ["VPSG / TEMVIDEO", "Captura 720p 30fps", "Portas COM", "CPAP", "Oxímetro"],
+    media: [],
     procedures: [
       { title: "6.1 — Vídeo VPSG", steps: [
         "Abra config.ini na pasta raiz.",
@@ -308,6 +332,13 @@ const sections = [
     description: "Metodologias de bancada para isolamento de ruídos e validação de eletrodos.",
     keywords: ["eletrodo", "touca", "pasta", "água com sal", "ruído", "a1", "a2", "testa", "ref", "bateria"],
     highlights: ["Teste da pasta", "Teste da água com sal", "A1 / A2 / TESTA / REF", "Fonte do notebook", "Higienização"],
+    media: [
+      "Como criar montagem.mp4",
+      "LIMPANDO O ELETRODO TOUCA.mp4",
+      "LIMPANDO O ELETRODO.mp4",
+      "teste em pasta video.mp4",
+      "teste em pasta.jpeg"
+    ],
     procedures: [
       { title: "7.1 — Teste da Pasta", steps: [
         "Conecte todos os eletrodos ao aparelho.",
@@ -358,6 +389,7 @@ const sections = [
     description: "Resgate de arquivos, reinstalação, nuvem, backup e licenciamento.",
     keywords: ["virtualstore", "reinstalação", "nano.new", "nano.old", "google drive", "dropbox", "backup", "licença", "fabrica"],
     highlights: ["VirtualStore", "Instalação limpa", "Google Drive / Dropbox", "Backup", "Licença"],
+    media: [],
     procedures: [
       { title: "8.1 — Resgate no VirtualStore", steps: [
         "Feche o iCelera.",
@@ -404,6 +436,14 @@ const sections = [
     description: "Implantação de novos clientes, parametrização e checklist pré-treinamento.",
     keywords: ["instalação", "novo cliente", "hardware", "nano", "iblue", "apneiacare", "pdf creator", "paciente", "quarto", "treinamento"],
     highlights: ["Requisitos de hardware", "Instalação inicial", "Dados da clínica", "Faixas de pacientes", "Nano1 / Nano2", "Run-in", "Checklist"],
+    media: [
+      "Atualizar Iblue.mp4",
+      "Atualização do Nano.mp4",
+      "Instalação do nano funconario.mp4",
+      "Instalação Fastpoli.mp4",
+      "Instalação Neurofeedback.mp4",
+      "Instalação PDF24.mp4"
+    ],
     procedures: [
       { title: "9.1 — Requisitos mínimos e recomendados", steps: [
         "Mínimo: Core i3 7ª geração ou superior, 4 GB RAM, SSD 500 GB, 2 portas RJ45 em Desktop ou RJ45 + Wi-Fi em Notebook.",
@@ -607,17 +647,27 @@ function openSection(id) {
   document.querySelector(".hero").classList.add("hidden");
   detailSection.classList.remove("hidden");
 
-detailContent.innerHTML = `
-    <div class="detail-header">
-      <span class="section-number" style="width:45px; height:45px; border-radius:14px; font-size:20px; font-weight:800; background:var(--blue); color:white; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">${s.id}</span>
-      <h2>${s.title}</h2>
-      <p>${s.description}</p>
+  detailContent.innerHTML = `
+    <div class="detail-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+      <div>
+        <span class="section-number" style="width:45px; height:45px; border-radius:14px; font-size:20px; font-weight:800; background:var(--blue); color:white; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">${s.id}</span>
+        <h2>${s.title}</h2>
+        <p>${s.description}</p>
+      </div>
+      <button class="primary-btn" style="width: auto; padding: 14px 24px; display: flex; align-items: center; gap: 8px;" onclick="requestGalleryAccess(${s.id})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        Abrir Galeria
+      </button>
     </div>
     ${s.procedures.map(p => `
       <article class="procedure">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px;">
           <h3 style="margin-bottom: 0; line-height: 1.2;">${p.title}</h3>
-          <button class="media-btn" title="Ver galeria de mídia" aria-label="Visualizar mídia">
+          <button class="media-btn" title="Ver galeria" onclick="requestGalleryAccess(${s.id})">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -761,7 +811,6 @@ if (chatToggle && chatPanel) {
 
         const data = await response.json();
 
-        // Tratamento especial para erro 503 (High Demand)
         if (response.status === 503 || (data.error && data.error.code === 503)) {
            throw new Error("503");
         }
@@ -769,7 +818,6 @@ if (chatToggle && chatPanel) {
 
         let aiText = data.candidates[0].content.parts[0].text;
         
-        // Conversão visual de Markdown para HTML
         aiText = aiText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         aiText = aiText.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
@@ -780,7 +828,6 @@ if (chatToggle && chatPanel) {
       } catch (error) {
         if (error.message === "503" || error.message.includes("high demand") || error.message.includes("503")) {
            if (attempt < maxRetries) {
-               // Aguarda 3 segundos silenciosamente antes de tentar de novo
                await new Promise(resolve => setTimeout(resolve, 3000)); 
            } else {
                document.getElementById(`load-${loadingId}`).remove();
@@ -795,7 +842,6 @@ if (chatToggle && chatPanel) {
     }
   }
 
-  // Previne refresh indesejado na página e intercepta o Enter/Clique
   sendBtn.addEventListener('click', (e) => {
     e.preventDefault();
     const text = aiInput.value.trim();
@@ -810,3 +856,160 @@ if (chatToggle && chatPanel) {
     }
   });
 }
+
+// ==========================================
+// LÓGICA DE LOGIN E GALERIA DE MÍDIA
+// ==========================================
+let currentUserRole = null; // 'tecnico' ou 'coordenador'
+let currentLoginTab = 'tecnico';
+let currentSectionForGallery = null;
+
+const loginModal = document.getElementById('loginModal');
+const galleryModal = document.getElementById('galleryModal');
+
+// Controles do Login
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentLoginTab = e.target.dataset.role;
+  });
+});
+
+document.getElementById('closeLoginBtn').addEventListener('click', () => {
+  loginModal.classList.remove('active');
+  document.getElementById('loginError').classList.add('hidden');
+});
+
+document.getElementById('submitLoginBtn').addEventListener('click', authenticate);
+document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') authenticate();
+});
+
+function authenticate() {
+  const pwd = document.getElementById('loginPassword').value;
+  
+  // Senhas mocadas (Em produção, isso viria de um Auth no Back-end)
+  if (currentLoginTab === 'tecnico' && pwd === '123') {
+      currentUserRole = 'tecnico';
+      finalizeLogin();
+  } else if (currentLoginTab === 'coordenador' && pwd === 'admin123') {
+      currentUserRole = 'coordenador';
+      finalizeLogin();
+  } else {
+      document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+
+function finalizeLogin() {
+  loginModal.classList.remove('active');
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').classList.add('hidden');
+  
+  if (currentSectionForGallery !== null) {
+      openGallery(currentSectionForGallery);
+  }
+}
+
+// Acesso e Renderização da Galeria
+function requestGalleryAccess(sectionId) {
+  currentSectionForGallery = sectionId;
+  if (!currentUserRole) {
+      loginModal.classList.add('active');
+  } else {
+      openGallery(sectionId);
+  }
+}
+
+document.getElementById('closeGalleryBtn').addEventListener('click', () => {
+  galleryModal.classList.remove('active');
+});
+
+function openGallery(sectionId) {
+  const section = sections.find(s => s.id === sectionId);
+  if (!section) return;
+
+  document.getElementById('galleryTitle').textContent = `Galeria: ${section.title}`;
+  const grid = document.getElementById('galleryGrid');
+  const tools = document.getElementById('coordinatorTools');
+  
+  // Controle de permissão do Coordenador
+  if (currentUserRole === 'coordenador') {
+      tools.classList.remove('hidden');
+  } else {
+      tools.classList.add('hidden');
+  }
+
+  // Renderizar itens
+  if (!section.media || section.media.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
+                          <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
+                          <p style="color:var(--muted);">Nenhuma mídia disponível para esta seção.</p>
+                        </div>`;
+  } else {
+      grid.innerHTML = section.media.map((file, index) => {
+          const extension = file.split('.').pop().toLowerCase();
+          const isVideo = ['mp4', 'webm', 'mov'].includes(extension);
+          const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
+          const path = `assets/tutorial_S${section.id}/${file}`;
+          
+          let mediaElement = '';
+          if (isVideo) {
+            mediaElement = `<video src="${path}" controls preload="metadata"></video>`;
+          } else if (isImage) {
+            mediaElement = `<img src="${path}" alt="${file}" loading="lazy">`;
+          } else {
+            mediaElement = `<div style="height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-soft); color: var(--primary-dark);">
+                              <span style="font-size:40px; margin-bottom: 5px;">📄</span>
+                              <span style="font-size: 12px; font-weight: bold;">Documento</span>
+                            </div>`;
+          }
+
+          const actions = currentUserRole === 'coordenador' 
+              ? `<div class="media-actions">
+                   <button class="action-btn edit" title="Editar nome" onclick="editMedia(${section.id}, ${index})">✎</button>
+                   <button class="action-btn" title="Excluir" onclick="deleteMedia(${section.id}, ${index})">🗑</button>
+                 </div>` 
+              : '';
+
+          return `
+          <div class="media-card">
+            ${mediaElement}
+            <div class="media-info">
+              <div class="media-name" title="${file}">${file}</div>
+            </div>
+            ${actions}
+          </div>`;
+      }).join('');
+  }
+  
+  galleryModal.classList.add('active');
+}
+
+// Funções do Coordenador (Simuladas no Front-end)
+function deleteMedia(sectionId, mediaIndex) {
+  if (confirm("Coordenador: Tem certeza que deseja excluir este arquivo permanentemente?")) {
+      const section = sections.find(s => s.id === sectionId);
+      section.media.splice(mediaIndex, 1);
+      openGallery(sectionId); // re-renderiza
+  }
+}
+
+function editMedia(sectionId, mediaIndex) {
+  const section = sections.find(s => s.id === sectionId);
+  const newName = prompt("Coordenador: Digite o novo nome do arquivo:", section.media[mediaIndex]);
+  if (newName && newName.trim() !== "") {
+      section.media[mediaIndex] = newName.trim();
+      openGallery(sectionId); // re-renderiza
+  }
+}
+
+document.getElementById('uploadMedia').addEventListener('change', (e) => {
+  if(e.target.files.length > 0 && currentSectionForGallery !== null) {
+      alert(`Coordenador: Upload de ${e.target.files.length} arquivo(s) simulado com sucesso na Seção ${currentSectionForGallery}. (Configure um back-end para armazenamento real).`);
+      // Simula a adição visualmente pegando apenas os nomes
+      const section = sections.find(s => s.id === currentSectionForGallery);
+      Array.from(e.target.files).forEach(file => section.media.push(file.name));
+      openGallery(currentSectionForGallery);
+  }
+});

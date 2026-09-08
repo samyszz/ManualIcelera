@@ -755,3 +755,90 @@ footer span { color: var(--muted); font-size: 14px; margin-top: 5px; }
   width: 20px;
   height: 20px;
 }
+/* =========================================
+   MODAIS (LOGIN E GALERIA) - SOFT UI
+========================================= */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1; pointer-events: auto;
+}
+
+.soft-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 32px;
+  padding: 40px;
+  box-shadow: 0 20px 50px rgba(0, 112, 140, 0.1);
+  width: 90%; max-width: 450px;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.dark .soft-modal {
+  background: rgba(16, 43, 52, 0.95);
+  border: 1px solid var(--border);
+}
+
+.modal-overlay.active .soft-modal { transform: translateY(0); }
+
+.close-modal {
+  position: absolute; top: 25px; right: 25px;
+  background: var(--bg); border: none;
+  width: 36px; height: 36px; border-radius: 50%;
+  color: var(--muted); font-size: 14px; font-weight: bold; transition: 0.2s;
+}
+
+.close-modal:hover { background: var(--border); color: var(--text); }
+
+.soft-modal h3 { color: var(--primary-dark); font-size: 24px; margin-bottom: 5px; }
+
+/* Abas de Login */
+.login-tabs { display: flex; gap: 10px; margin: 20px 0; background: var(--bg); padding: 6px; border-radius: 18px; }
+.tab-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 14px; color: var(--muted); font-weight: 600; font-size: 14px; transition: 0.3s; }
+.tab-btn.active { background: var(--surface); color: var(--blue); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+/* Inputs e Botões Internos */
+.soft-input { width: 100%; padding: 16px 20px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); margin-bottom: 20px; font-size: 15px; outline: none; transition: 0.3s; color: var(--text); }
+.soft-input:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 4px rgba(41, 175, 198, 0.15); }
+
+.primary-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; background: linear-gradient(135deg, var(--blue), var(--primary)); color: white; font-weight: 700; font-size: 16px; box-shadow: 0 10px 25px rgba(0, 174, 239, 0.3); transition: transform 0.2s; cursor: pointer; }
+.primary-btn:hover { transform: translateY(-2px); }
+
+.error-text { color: #e74c3c; font-size: 13px; font-weight: 600; margin-top: 15px; text-align: center; }
+
+/* Galeria */
+.gallery-modal { max-width: 900px; max-height: 90vh; overflow-y: auto; padding: 40px; }
+.gallery-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+.gallery-header h3 { margin: 0; }
+
+.coordinator-tools { background: var(--surface-soft); padding: 25px; border-radius: 24px; border: 2px dashed var(--border); margin-bottom: 30px; text-align: center; }
+.upload-btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; background: var(--surface); color: var(--primary-dark); border-radius: 16px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 20px rgba(0, 112, 140, 0.06); }
+.upload-btn:hover { background: var(--blue); color: white; transform: translateY(-2px); }
+.upload-btn span { font-size: 20px; margin-right: 8px; font-weight: normal; }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+.media-card { background: var(--bg); border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: 0.3s; display: flex; flex-direction: column; }
+.media-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0, 112, 140, 0.08); }
+.media-card video, .media-card img { width: 100%; height: 160px; object-fit: cover; display: block; background: #000; }
+.media-info { padding: 15px; display: flex; align-items: center; justify-content: space-between; }
+.media-name { font-size: 13px; color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
+
+.media-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; opacity: 0; transition: 0.2s; }
+.media-card:hover .media-actions { opacity: 1; }
+.action-btn { width: 34px; height: 34px; border-radius: 12px; border: none; background: rgba(255,255,255,0.95); color: #e74c3c; cursor: pointer; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.2s; }
+.dark .action-btn { background: var(--surface); }
+.action-btn.edit { color: var(--blue); }
+.action-btn:hover { background: white; transform: scale(1.1); }

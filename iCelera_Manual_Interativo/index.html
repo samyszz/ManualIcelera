@@ -134,5 +134,48 @@
   </div>
 
   <script src="script.js"></script>
+
+  <!-- Modal de Login -->
+    <div class="modal-overlay" id="loginModal">
+      <div class="modal-content soft-modal">
+        <button class="close-modal" id="closeLoginBtn">✕</button>
+        <h3>Acesso à Galeria</h3>
+        <p style="color: var(--muted); margin-bottom: 20px;">Selecione seu perfil para continuar</p>
+        
+        <div class="login-tabs">
+          <button class="tab-btn active" data-role="tecnico">Técnico</button>
+          <button class="tab-btn" data-role="coordenador">Coordenador</button>
+        </div>
+        
+        <input type="password" id="loginPassword" placeholder="Digite a senha..." class="soft-input">
+        <button class="primary-btn" id="submitLoginBtn">Entrar</button>
+        <p id="loginError" class="error-text hidden">Senha incorreta.</p>
+      </div>
+    </div>
+
+    <!-- Modal da Galeria -->
+    <div class="modal-overlay" id="galleryModal">
+      <div class="modal-content gallery-modal soft-modal">
+        <div class="gallery-header">
+          <h3 id="galleryTitle">Galeria</h3>
+          <button class="close-modal" id="closeGalleryBtn">✕</button>
+        </div>
+        
+        <!-- Ferramentas do Coordenador (Oculto por padrão) -->
+        <div id="coordinatorTools" class="coordinator-tools hidden">
+          <div class="upload-area">
+            <input type="file" id="uploadMedia" multiple class="hidden">
+            <label for="uploadMedia" class="upload-btn">
+              <span>+</span> Fazer Upload de Mídia
+            </label>
+            <p style="font-size: 12px; color: var(--muted); margin-top: 10px;">(O upload real requer integração com back-end/Firebase)</p>
+          </div>
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- Mídias injetadas pelo JS -->
+        </div>
+      </div>
+    </div>
 </body>
 </html>
