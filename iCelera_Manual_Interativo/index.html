@@ -22,10 +22,11 @@
         </a>
       </div>
 
-      <div class="topbar-actions">
-        <button class="icon-btn" id="themeBtn" title="Alternar modo escuro">◐</button>
-        <button class="icon-btn" id="fontBtn" title="Aumentar tamanho do texto">A+</button>
-      </div>
+<div class="topbar-actions">
+  <button class="icon-btn" id="themeBtn" title="Alternar modo escuro">◐</button>
+  <button class="icon-btn" id="fontBtn" title="Aumentar tamanho do texto">A+</button>
+  <button class="icon-btn hidden" id="logoutBtn" title="Sair do Sistema" style="color: #e74c3c;">⎋</button>
+</div>
     </header>
 
     <!-- Sidebar Oculta (Off-canvas) para os Dropdowns -->
@@ -137,8 +138,8 @@
     <div class="modal-overlay" id="loginModal">
       <div class="modal-content soft-modal">
         <button class="close-modal" id="closeLoginBtn">✕</button>
-        <h3>Acesso à Galeria</h3>
-        <p style="color: var(--muted); margin-bottom: 20px;">Selecione seu perfil para continuar</p>
+        <h3>Bem vindo á Icelera!</h3>
+        <p style="color: var(--muted); margin-bottom: 20px;">Selecione seu perfil e preencha seus dados para continuar</p>
         
         <div class="login-tabs">
           <button class="tab-btn active" data-role="tecnico">Técnico</button>
@@ -176,7 +177,7 @@
       </div>
     </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 
 
 </body>

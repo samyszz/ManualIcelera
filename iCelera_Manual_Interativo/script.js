@@ -1,3 +1,25 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// ==========================================
+// CONFIGURAÇÃO FIREBASE
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDgSx5qFz2S6gsj00T7meCrSYyIv54uCmE",
+  authDomain: "iceleramanual.firebaseapp.com",
+  projectId: "iceleramanual",
+  storageBucket: "iceleramanual.firebasestorage.app",
+  messagingSenderId: "939770142735",
+  appId: "1:939770142735:web:88dd046c02dc70a029437a",
+  measurementId: "G-KTD865N7DY"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// ==========================================
+// BASE DE DADOS (SEÇÕES DO MANUAL)
+// ==========================================
 const sections = [
   {
     id: 1,
@@ -496,9 +518,9 @@ const sections = [
   }
 ];
 
-// ----------------------------------------------------
+// ==========================================
 // ELEMENTOS GLOBAIS E HAMBURGER MENU
-// ----------------------------------------------------
+// ==========================================
 const sideNav = document.getElementById("sideNav");
 const sectionGrid = document.getElementById("sectionGrid");
 const detailSection = document.getElementById("detailSection");
@@ -603,9 +625,9 @@ function renderSideNav() {
   });
 }
 
-// ----------------------------------------------------
-// RENDERIZAÇÃO DOS CARDS SOFT UI
-// ----------------------------------------------------
+// ==========================================
+// RENDERIZAÇÃO DOS CARDS E SEÇÕES
+// ==========================================
 function cardTemplate(s) {
   return `
     <article class="section-card">
@@ -654,7 +676,7 @@ function openSection(id) {
         <h2>${s.title}</h2>
         <p>${s.description}</p>
       </div>
-      <button class="primary-btn" style="width: auto; padding: 14px 24px; display: flex; align-items: center; gap: 8px;" onclick="requestGalleryAccess(${s.id})">
+      <button class="primary-btn" style="width: auto; padding: 14px 24px; display: flex; align-items: center; gap: 8px;" onclick="window.requestGalleryAccess(${s.id})">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
           <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -667,7 +689,7 @@ function openSection(id) {
       <article class="procedure">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px;">
           <h3 style="margin-bottom: 0; line-height: 1.2;">${p.title}</h3>
-          <button class="media-btn" title="Ver galeria" onclick="requestGalleryAccess(${s.id})">
+          <button class="media-btn" title="Ver galeria" onclick="window.requestGalleryAccess(${s.id})">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -698,9 +720,9 @@ if (document.getElementById("backBtn")) {
   document.getElementById("backBtn").addEventListener("click", closeSection);
 }
 
-// ----------------------------------------------------
-// BUSCA E EVENTOS
-// ----------------------------------------------------
+// ==========================================
+// BUSCA E EVENTOS GERAIS
+// ==========================================
 if (searchInput) {
   searchInput.addEventListener("input", e => {
     const query = e.target.value.trim().toLowerCase();
@@ -740,9 +762,9 @@ if (localStorage.getItem("icelera-theme") === "dark") {
 renderSideNav();
 renderCards();
 
-// ----------------------------------------------------
-// INTEGRAÇÃO API GEMINI (Assistente Virtual Auto-Retry)
-// ----------------------------------------------------
+// ==========================================
+// INTEGRAÇÃO API GEMINI
+// ==========================================
 const chatToggle = document.getElementById('chatToggle');
 const chatPanel = document.getElementById('chatPanel');
 const closeChat = document.getElementById('closeChat');
@@ -858,16 +880,24 @@ if (chatToggle && chatPanel) {
 }
 
 // ==========================================
-// LÓGICA DE LOGIN E GALERIA DE MÍDIA
+// AUTENTICAÇÃO E GALERIA COM FIREBASE
 // ==========================================
-let currentUserRole = null; // 'tecnico' ou 'coordenador'
+const roleEmails = {
+  tecnico: "tecnico@icelera.com",
+  coordenador: "coordenador@icelera.com"
+};
+
+let currentUserRole = null;
 let currentLoginTab = 'tecnico';
 let currentSectionForGallery = null;
 
 const loginModal = document.getElementById('loginModal');
 const galleryModal = document.getElementById('galleryModal');
+const logoutBtn = document.getElementById('logoutBtn');
+const submitLoginBtn = document.getElementById('submitLoginBtn');
+const loginError = document.getElementById('loginError');
 
-// Controles do Login
+// Controle das abas do Modal
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -876,50 +906,94 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-document.getElementById('closeLoginBtn').addEventListener('click', () => {
-  loginModal.classList.remove('active');
-  document.getElementById('loginError').classList.add('hidden');
-});
-
-document.getElementById('submitLoginBtn').addEventListener('click', authenticate);
-document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') authenticate();
-});
-
-function authenticate() {
+// Ação de Login (Firebase)
+async function authenticate() {
   const pwd = document.getElementById('loginPassword').value;
-  
-  // Senhas mocadas (Em produção, isso viria de um Auth no Back-end)
-  if (currentLoginTab === 'tecnico' && pwd === '123') {
-      currentUserRole = 'tecnico';
-      finalizeLogin();
-  } else if (currentLoginTab === 'coordenador' && pwd === 'admin123') {
-      currentUserRole = 'coordenador';
-      finalizeLogin();
-  } else {
-      document.getElementById('loginError').classList.remove('hidden');
+  const email = roleEmails[currentLoginTab];
+
+  if (!pwd) {
+    showError("Digite a senha para continuar.");
+    return;
+  }
+
+  submitLoginBtn.textContent = "Autenticando...";
+  submitLoginBtn.disabled = true;
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pwd);
+    // O onAuthStateChanged vai capturar o sucesso
+  } catch (error) {
+    console.error("Erro no login:", error.code);
+    showError("Credenciais inválidas. Tente novamente.");
+    submitLoginBtn.textContent = "Entrar";
+    submitLoginBtn.disabled = false;
   }
 }
 
-function finalizeLogin() {
-  loginModal.classList.remove('active');
-  document.getElementById('loginPassword').value = '';
-  document.getElementById('loginError').classList.add('hidden');
-  
-  if (currentSectionForGallery !== null) {
+function showError(msg) {
+  loginError.textContent = msg;
+  loginError.classList.remove('hidden');
+}
+
+if (submitLoginBtn) {
+  submitLoginBtn.addEventListener('click', authenticate);
+}
+
+if (document.getElementById('loginPassword')) {
+  document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') authenticate();
+  });
+}
+
+// Observador de Sessão (O Coração da Segurança)
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Usuário logado: Desbloqueia o sistema
+    currentUserRole = user.email.includes("coordenador") ? "coordenador" : "tecnico";
+    
+    document.body.classList.remove('locked');
+    loginModal.classList.remove('active');
+    if (logoutBtn) logoutBtn.classList.remove('hidden');
+    
+    submitLoginBtn.textContent = "Entrar";
+    submitLoginBtn.disabled = false;
+    document.getElementById('loginPassword').value = '';
+    loginError.classList.add('hidden');
+
+    if (currentSectionForGallery !== null) {
       openGallery(currentSectionForGallery);
+    }
+  } else {
+    // Ninguém logado: Trava o sistema
+    currentUserRole = null;
+    document.body.classList.add('locked');
+    loginModal.classList.add('active');
+    if (logoutBtn) logoutBtn.classList.add('hidden');
+    
+    // Se a galeria estiver aberta, fecha
+    if (galleryModal.classList.contains('active')) {
+        galleryModal.classList.remove('active');
+    }
   }
+});
+
+// Logout
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    signOut(auth).catch(err => console.error("Erro ao sair:", err));
+  });
 }
 
-// Acesso e Renderização da Galeria
+// ==========================================
+// FUNÇÕES DA GALERIA 
+// ==========================================
 function requestGalleryAccess(sectionId) {
   currentSectionForGallery = sectionId;
-  if (!currentUserRole) {
-      loginModal.classList.add('active');
-  } else {
-      openGallery(sectionId);
-  }
+  openGallery(sectionId);
 }
+
+// Expõe a função globalmente para que o HTML consiga acessá-la
+window.requestGalleryAccess = requestGalleryAccess;
 
 document.getElementById('closeGalleryBtn').addEventListener('click', () => {
   galleryModal.classList.remove('active');
@@ -933,14 +1007,12 @@ function openGallery(sectionId) {
   const grid = document.getElementById('galleryGrid');
   const tools = document.getElementById('coordinatorTools');
   
-  // Controle de permissão do Coordenador
   if (currentUserRole === 'coordenador') {
       tools.classList.remove('hidden');
   } else {
       tools.classList.add('hidden');
   }
 
-  // Renderizar itens
   if (!section.media || section.media.length === 0) {
       grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
                           <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
@@ -967,8 +1039,8 @@ function openGallery(sectionId) {
 
           const actions = currentUserRole === 'coordenador' 
               ? `<div class="media-actions">
-                   <button class="action-btn edit" title="Editar nome" onclick="editMedia(${section.id}, ${index})">✎</button>
-                   <button class="action-btn" title="Excluir" onclick="deleteMedia(${section.id}, ${index})">🗑</button>
+                   <button class="action-btn edit" title="Editar nome" onclick="window.editMedia(${section.id}, ${index})">✎</button>
+                   <button class="action-btn" title="Excluir" onclick="window.deleteMedia(${section.id}, ${index})">🗑</button>
                  </div>` 
               : '';
 
@@ -986,35 +1058,31 @@ function openGallery(sectionId) {
   galleryModal.classList.add('active');
 }
 
-// Funções do Coordenador (Simuladas no Front-end)
+// Ações do Coordenador (Visuais - Front-end)
 function deleteMedia(sectionId, mediaIndex) {
   if (confirm("Coordenador: Tem certeza que deseja excluir este arquivo permanentemente?")) {
       const section = sections.find(s => s.id === sectionId);
       section.media.splice(mediaIndex, 1);
-      openGallery(sectionId); // re-renderiza
+      openGallery(sectionId); 
   }
 }
+window.deleteMedia = deleteMedia;
 
 function editMedia(sectionId, mediaIndex) {
   const section = sections.find(s => s.id === sectionId);
   const newName = prompt("Coordenador: Digite o novo nome do arquivo:", section.media[mediaIndex]);
   if (newName && newName.trim() !== "") {
       section.media[mediaIndex] = newName.trim();
-      openGallery(sectionId); // re-renderiza
+      openGallery(sectionId); 
   }
 }
+window.editMedia = editMedia;
 
 document.getElementById('uploadMedia').addEventListener('change', (e) => {
   if(e.target.files.length > 0 && currentSectionForGallery !== null) {
-      alert(`Coordenador: Upload de ${e.target.files.length} arquivo(s) simulado com sucesso na Seção ${currentSectionForGallery}. (Configure um back-end para armazenamento real).`);
-      // Simula a adição visualmente pegando apenas os nomes
+      alert(`Coordenador: Upload de ${e.target.files.length} arquivo(s) simulado com sucesso na Seção ${currentSectionForGallery}.`);
       const section = sections.find(s => s.id === currentSectionForGallery);
       Array.from(e.target.files).forEach(file => section.media.push(file.name));
       openGallery(currentSectionForGallery);
   }
-});
-
-// Abre o modal de login automaticamente assim que o site é carregado
-window.addEventListener('DOMContentLoaded', () => {
-  loginModal.classList.add('active');
 });
