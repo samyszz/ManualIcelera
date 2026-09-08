@@ -761,11 +761,30 @@ async function authenticate() {
       submitLoginBtn.disabled = true;
   }
 
+  // Timeout de segurança: se o Firebase demorar mais de 8 segundos, destrava o botão
+  const safetyTimeout = setTimeout(() => {
+      if (submitLoginBtn && submitLoginBtn.textContent.includes("Autenticando")) {
+          submitLoginBtn.textContent = "Entrar";
+          submitLoginBtn.disabled = false;
+          showError("A conexão com o Firebase demorou muito. Verifique sua internet.");
+      }
+  }, 8000);
+
   try {
     await signInWithEmailAndPassword(auth, email, pwd);
+    clearTimeout(safetyTimeout);
   } catch (error) {
-    console.error("Erro no login:", error.code);
-    showError("Credenciais inválidas. Tente novamente.");
+    clearTimeout(safetyTimeout);
+    console.error("Erro no login:", error.code, error.message);
+    
+    let mensagemErro = "Credenciais inválidas. Tente novamente.";
+    if (error.code === 'auth/network-request-failed') {
+        mensagemErro = "Erro de rede. Verifique sua conexão com a internet.";
+    } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        mensagemErro = "Senha incorreta para este perfil.";
+    }
+    
+    showError(mensagemErro);
     if (submitLoginBtn) {
         submitLoginBtn.textContent = "Entrar";
         submitLoginBtn.disabled = false;
