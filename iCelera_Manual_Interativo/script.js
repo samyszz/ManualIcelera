@@ -810,9 +810,10 @@ onAuthStateChanged(auth, (user) => {
     document.body.classList.remove('locked');
     
     if (loginModal) {
-        loginModal.classList.remove('active');
-        loginModal.style.pointerEvents = 'none'; 
-    }
+    loginModal.classList.remove('active');
+    loginModal.style.pointerEvents = 'none'; 
+}
+
     
     logoutBtn?.classList.remove('hidden');
     
