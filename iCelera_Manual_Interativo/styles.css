@@ -985,3 +985,44 @@ body.locked .app-shell {
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
+
+/* CORREÇÃO DO FECHAMENTO DO MODAL DE LOGIN */
+
+/* O modal só aparece quando tiver a classe active */
+#loginModal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(11, 17, 32, 0.85) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  /* Respeita o controle via JS: se não tiver .active, fica invisível */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Quando o JS ativar o modal, ele aparece */
+#loginModal.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Caixa interna sólida e nítida */
+#loginModal .soft-modal {
+  background: #ffffff !important;
+  opacity: 1 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+  position: relative !important;
+  z-index: 1000000 !important;
+}
