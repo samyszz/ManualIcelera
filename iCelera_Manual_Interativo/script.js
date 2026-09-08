@@ -519,7 +519,7 @@ const sections = [
 ];
 
 // ==========================================
-// ELEMENTOS GLOBAIS E HAMBURGER MENU
+// ELEMENTOS GLOBAIS E EVENTOS SEGUROS
 // ==========================================
 const sideNav = document.getElementById("sideNav");
 const sectionGrid = document.getElementById("sectionGrid");
@@ -527,22 +527,21 @@ const detailSection = document.getElementById("detailSection");
 const detailContent = document.getElementById("detailContent");
 const searchInput = document.getElementById("searchInput");
 const resultCount = document.getElementById("resultCount");
-
 const menuBtn = document.getElementById("menuBtn");
 const menuCloseBtn = document.getElementById("menuClose");
 const sidebarEl = document.getElementById("sidebar");
 const overlayEl = document.getElementById("overlay");
 
 function toggleMenu() {
-  if (sidebarEl) sidebarEl.classList.toggle("open");
-  if (overlayEl) overlayEl.classList.toggle("show");
+  sidebarEl?.classList.toggle("open");
+  overlayEl?.classList.toggle("show");
 }
 
-if (menuBtn) menuBtn.addEventListener("click", toggleMenu);
-if (menuCloseBtn) menuCloseBtn.addEventListener("click", toggleMenu);
-if (overlayEl) overlayEl.addEventListener("click", toggleMenu);
+menuBtn?.addEventListener("click", toggleMenu);
+menuCloseBtn?.addEventListener("click", toggleMenu);
+overlayEl?.addEventListener("click", toggleMenu);
 
-// Renderização do Menu Lateral com Dropdowns (Sanfona)
+// Renderização do Menu Lateral
 function renderSideNav() {
   if (!sideNav) return;
   sideNav.innerHTML = '';
@@ -625,9 +624,7 @@ function renderSideNav() {
   });
 }
 
-// ==========================================
-// RENDERIZAÇÃO DOS CARDS E SEÇÕES
-// ==========================================
+// Renderização dos Cards Principais
 function cardTemplate(s) {
   return `
     <article class="section-card">
@@ -662,11 +659,11 @@ function renderCards(list = sections) {
 
 function openSection(id) {
   const s = sections.find(item => item.id === id);
-  if (!s) return;
+  if (!s || !detailContent || !detailSection) return;
 
-  document.querySelector(".navigation-section").classList.add("hidden");
-  document.querySelector(".quick-panel").classList.add("hidden");
-  document.querySelector(".hero").classList.add("hidden");
+  document.querySelector(".navigation-section")?.classList.add("hidden");
+  document.querySelector(".quick-panel")?.classList.add("hidden");
+  document.querySelector(".hero")?.classList.add("hidden");
   detailSection.classList.remove("hidden");
 
   detailContent.innerHTML = `
@@ -709,39 +706,33 @@ function openSection(id) {
 }
 
 function closeSection() {
-  detailSection.classList.add("hidden");
-  document.querySelector(".navigation-section").classList.remove("hidden");
-  document.querySelector(".quick-panel").classList.remove("hidden");
-  document.querySelector(".hero").classList.remove("hidden");
+  detailSection?.classList.add("hidden");
+  document.querySelector(".navigation-section")?.classList.remove("hidden");
+  document.querySelector(".quick-panel")?.classList.remove("hidden");
+  document.querySelector(".hero")?.classList.remove("hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-if (document.getElementById("backBtn")) {
-  document.getElementById("backBtn").addEventListener("click", closeSection);
-}
+document.getElementById("backBtn")?.addEventListener("click", closeSection);
 
-// ==========================================
-// BUSCA E EVENTOS GERAIS
-// ==========================================
-if (searchInput) {
-  searchInput.addEventListener("input", e => {
-    const query = e.target.value.trim().toLowerCase();
-    if (!query) {
-      renderCards(); 
-      return;
-    }
-    const filtered = sections.filter(s => {
-      const haystack = [
-        s.title,
-        s.description,
-        ...s.keywords,
-        ...s.procedures.map(p => `${p.title} ${p.intro || ""} ${p.steps.join(" ")}`)
-      ].join(" ").toLowerCase();
-      return haystack.includes(query);
-    });
-    renderCards(filtered);
+// Busca e Tema
+searchInput?.addEventListener("input", e => {
+  const query = e.target.value.trim().toLowerCase();
+  if (!query) {
+    renderCards(); 
+    return;
+  }
+  const filtered = sections.filter(s => {
+    const haystack = [
+      s.title,
+      s.description,
+      ...s.keywords,
+      ...s.procedures.map(p => `${p.title} ${p.intro || ""} ${p.steps.join(" ")}`)
+    ].join(" ").toLowerCase();
+    return haystack.includes(query);
   });
-}
+  renderCards(filtered);
+});
 
 document.getElementById("themeBtn")?.addEventListener("click", () => {
   document.body.classList.toggle("dark");
@@ -763,124 +754,7 @@ renderSideNav();
 renderCards();
 
 // ==========================================
-// INTEGRAÇÃO API GEMINI
-// ==========================================
-const chatToggle = document.getElementById('chatToggle');
-const chatPanel = document.getElementById('chatPanel');
-const closeChat = document.getElementById('closeChat');
-const chatMessages = document.getElementById('chatMessages');
-const aiInput = document.getElementById('aiInput');
-const sendBtn = document.getElementById('sendBtn');
-
-if (chatToggle && chatPanel) {
-
-  const GEMINI_API_KEY = 'AQ.Ab8RN6IsDTmzkMajJ29JCFixs70Ryg0A9bm5FKXM4cgM6QG4Yg'; 
-
-  chatToggle.addEventListener('click', () => chatPanel.classList.add('active'));
-  closeChat.addEventListener('click', () => chatPanel.classList.remove('active'));
-
-  function addMessage(text, sender) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${sender}-message`;
-    msgDiv.innerHTML = text.replace(/\n/g, '<br>'); 
-    chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  const systemContext = `
-  Você é o Assistente Virtual Oficial de Suporte Técnico da iCelera.
-  Sua missão é ajudar os técnicos a resolverem problemas de forma rápida e direta.
-  Sempre analise a Base de Conhecimento fornecida abaixo e responda com o diagnóstico e o passo a passo da solução.
-  Seja conciso.
-
-  BASE DE CONHECIMENTO:
-  ${JSON.stringify(sections)}
-  `;
-
-  async function fetchGeminiResponse(userPrompt) {
-    addMessage(userPrompt, 'user');
-    aiInput.value = '';
-    
-    const loadingId = Date.now();
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'message ai-message';
-    loadingDiv.id = `load-${loadingId}`;
-    loadingDiv.innerHTML = '<i>Analisando o manual...</i>';
-    chatMessages.appendChild(loadingDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    let maxRetries = 3;
-    let attempt = 0;
-    let success = false;
-
-    while (attempt < maxRetries && !success) {
-      attempt++;
-      try {
-        if (attempt > 1) {
-           document.getElementById(`load-${loadingId}`).innerHTML = `<i>Servidor congestionado. Tentativa ${attempt} de ${maxRetries}...</i>`;
-        }
-
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-                { role: "user", parts: [{ text: systemContext + "\n\nPergunta do Técnico: " + userPrompt }] }
-            ],
-            generationConfig: { temperature: 0.2 }
-          })
-        });
-
-        const data = await response.json();
-
-        if (response.status === 503 || (data.error && data.error.code === 503)) {
-           throw new Error("503");
-        }
-        if (data.error) throw new Error(data.error.message);
-
-        let aiText = data.candidates[0].content.parts[0].text;
-        
-        aiText = aiText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        aiText = aiText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-        document.getElementById(`load-${loadingId}`).remove();
-        addMessage(aiText, 'ai');
-        success = true;
-
-      } catch (error) {
-        if (error.message === "503" || error.message.includes("high demand") || error.message.includes("503")) {
-           if (attempt < maxRetries) {
-               await new Promise(resolve => setTimeout(resolve, 3000)); 
-           } else {
-               document.getElementById(`load-${loadingId}`).remove();
-               addMessage("⚠️ Os servidores da Inteligência Artificial estão com alta demanda no momento. Aguarde alguns segundos e tente novamente.", 'ai');
-           }
-        } else {
-           document.getElementById(`load-${loadingId}`).remove();
-           addMessage("⚠️ Ocorreu um erro de conexão: " + error.message, 'ai');
-           break;
-        }
-      }
-    }
-  }
-
-  sendBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    const text = aiInput.value.trim();
-    if(text) fetchGeminiResponse(text);
-  });
-
-  aiInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const text = aiInput.value.trim();
-      if(text) fetchGeminiResponse(text);
-    }
-  });
-}
-
-// ==========================================
-// AUTENTICAÇÃO E GALERIA COM FIREBASE
+// AUTENTICAÇÃO E GALERIA COM FIREBASE (COM TRAVA DE SEGURANÇA)
 // ==========================================
 const roleEmails = {
   tecnico: "suporte.icelera3@icelera.com.br",
@@ -906,9 +780,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// Ação de Login (Firebase)
+// Ação de Login
 async function authenticate() {
-  const pwd = document.getElementById('loginPassword').value;
+  const pwd = document.getElementById('loginPassword')?.value;
   const email = roleEmails[currentLoginTab];
 
   if (!pwd) {
@@ -916,173 +790,286 @@ async function authenticate() {
     return;
   }
 
-  submitLoginBtn.textContent = "Autenticando...";
-  submitLoginBtn.disabled = true;
+  if (submitLoginBtn) {
+      submitLoginBtn.textContent = "Autenticando...";
+      submitLoginBtn.disabled = true;
+  }
 
   try {
     await signInWithEmailAndPassword(auth, email, pwd);
-    // O onAuthStateChanged vai capturar o sucesso
   } catch (error) {
     console.error("Erro no login:", error.code);
     showError("Credenciais inválidas. Tente novamente.");
-    submitLoginBtn.textContent = "Entrar";
-    submitLoginBtn.disabled = false;
+    if (submitLoginBtn) {
+        submitLoginBtn.textContent = "Entrar";
+        submitLoginBtn.disabled = false;
+    }
   }
 }
 
 function showError(msg) {
-  loginError.textContent = msg;
-  loginError.classList.remove('hidden');
+  if (loginError) {
+      loginError.textContent = msg;
+      loginError.classList.remove('hidden');
+  }
 }
 
-if (submitLoginBtn) {
-  submitLoginBtn.addEventListener('click', authenticate);
-}
+submitLoginBtn?.addEventListener('click', authenticate);
+document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') authenticate();
+});
 
-if (document.getElementById('loginPassword')) {
-  document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') authenticate();
-  });
-}
-
-// Observador de Sessão (O Coração da Segurança)
+// O Observador (Força a Liberação de Cliques)
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Usuário logado: Desbloqueia o sistema
     currentUserRole = user.email.includes("coordenador") ? "coordenador" : "tecnico";
     
+    // Libera a tela
     document.body.classList.remove('locked');
-    loginModal.classList.remove('active');
-    if (logoutBtn) logoutBtn.classList.remove('hidden');
     
-    submitLoginBtn.textContent = "Entrar";
-    submitLoginBtn.disabled = false;
-    document.getElementById('loginPassword').value = '';
-    loginError.classList.add('hidden');
+    if (loginModal) {
+        loginModal.classList.remove('active');
+        // GARANTIA que o fundo invisível saia da frente:
+        loginModal.style.pointerEvents = 'none'; 
+    }
+    
+    logoutBtn?.classList.remove('hidden');
+    
+    if (submitLoginBtn) {
+        submitLoginBtn.textContent = "Entrar";
+        submitLoginBtn.disabled = false;
+    }
+    if (document.getElementById('loginPassword')) {
+        document.getElementById('loginPassword').value = '';
+    }
+    loginError?.classList.add('hidden');
 
     if (currentSectionForGallery !== null) {
       openGallery(currentSectionForGallery);
     }
   } else {
-    // Ninguém logado: Trava o sistema
+    // Trava a tela
     currentUserRole = null;
     document.body.classList.add('locked');
-    loginModal.classList.add('active');
-    if (logoutBtn) logoutBtn.classList.add('hidden');
     
-    // Se a galeria estiver aberta, fecha
-    if (galleryModal.classList.contains('active')) {
+    if (loginModal) {
+        loginModal.classList.add('active');
+        loginModal.style.pointerEvents = 'auto'; // Reativa cliques apenas pro modal
+    }
+    
+    logoutBtn?.classList.add('hidden');
+    
+    if (galleryModal?.classList.contains('active')) {
         galleryModal.classList.remove('active');
+        galleryModal.style.pointerEvents = 'none';
     }
   }
 });
 
-// Logout
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth).catch(err => console.error("Erro ao sair:", err));
-  });
-}
+// Logout (Forçando o recarregamento total da página)
+logoutBtn?.addEventListener('click', async () => {
+  try {
+      await signOut(auth);
+      window.location.reload(); // Recarrega a página para evitar bugs
+  } catch(err) {
+      console.error("Erro ao sair:", err);
+  }
+});
 
 // ==========================================
 // FUNÇÕES DA GALERIA 
 // ==========================================
-function requestGalleryAccess(sectionId) {
+window.requestGalleryAccess = function(sectionId) {
   currentSectionForGallery = sectionId;
   openGallery(sectionId);
-}
+};
 
-// Expõe a função globalmente para que o HTML consiga acessá-la
-window.requestGalleryAccess = requestGalleryAccess;
-
-document.getElementById('closeGalleryBtn').addEventListener('click', () => {
-  galleryModal.classList.remove('active');
+document.getElementById('closeGalleryBtn')?.addEventListener('click', () => {
+  if (galleryModal) {
+      galleryModal.classList.remove('active');
+      galleryModal.style.pointerEvents = 'none'; // Garante que a galeria não bloqueie a tela
+  }
 });
 
 function openGallery(sectionId) {
   const section = sections.find(s => s.id === sectionId);
   if (!section) return;
 
-  document.getElementById('galleryTitle').textContent = `Galeria: ${section.title}`;
+  const galleryTitle = document.getElementById('galleryTitle');
+  if (galleryTitle) galleryTitle.textContent = `Galeria: ${section.title}`;
+  
   const grid = document.getElementById('galleryGrid');
   const tools = document.getElementById('coordinatorTools');
   
-  if (currentUserRole === 'coordenador') {
-      tools.classList.remove('hidden');
-  } else {
-      tools.classList.add('hidden');
+  if (tools) {
+      if (currentUserRole === 'coordenador') tools.classList.remove('hidden');
+      else tools.classList.add('hidden');
   }
 
-  if (!section.media || section.media.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
-                          <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
-                          <p style="color:var(--muted);">Nenhuma mídia disponível para esta seção.</p>
-                        </div>`;
-  } else {
-      grid.innerHTML = section.media.map((file, index) => {
-          const extension = file.split('.').pop().toLowerCase();
-          const isVideo = ['mp4', 'webm', 'mov'].includes(extension);
-          const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
-          const path = `assets/tutorial_S${section.id}/${file}`;
-          
-          let mediaElement = '';
-          if (isVideo) {
-            mediaElement = `<video src="${path}" controls preload="metadata"></video>`;
-          } else if (isImage) {
-            mediaElement = `<img src="${path}" alt="${file}" loading="lazy">`;
-          } else {
-            mediaElement = `<div style="height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-soft); color: var(--primary-dark);">
-                              <span style="font-size:40px; margin-bottom: 5px;">📄</span>
-                              <span style="font-size: 12px; font-weight: bold;">Documento</span>
+  if (grid) {
+      if (!section.media || section.media.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
+                              <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
+                              <p style="color:var(--muted);">Nenhuma mídia disponível para esta seção.</p>
                             </div>`;
-          }
+      } else {
+          grid.innerHTML = section.media.map((file, index) => {
+              const extension = file.split('.').pop().toLowerCase();
+              const isVideo = ['mp4', 'webm', 'mov'].includes(extension);
+              const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
+              const path = `assets/tutorial_S${section.id}/${file}`;
+              
+              let mediaElement = '';
+              if (isVideo) {
+                mediaElement = `<video src="${path}" controls preload="metadata"></video>`;
+              } else if (isImage) {
+                mediaElement = `<img src="${path}" alt="${file}" loading="lazy">`;
+              } else {
+                mediaElement = `<div style="height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-soft); color: var(--primary-dark);">
+                                  <span style="font-size:40px; margin-bottom: 5px;">📄</span>
+                                  <span style="font-size: 12px; font-weight: bold;">Documento</span>
+                                </div>`;
+              }
 
-          const actions = currentUserRole === 'coordenador' 
-              ? `<div class="media-actions">
-                   <button class="action-btn edit" title="Editar nome" onclick="window.editMedia(${section.id}, ${index})">✎</button>
-                   <button class="action-btn" title="Excluir" onclick="window.deleteMedia(${section.id}, ${index})">🗑</button>
-                 </div>` 
-              : '';
+              const actions = currentUserRole === 'coordenador' 
+                  ? `<div class="media-actions">
+                       <button class="action-btn edit" title="Editar nome" onclick="window.editMedia(${section.id}, ${index})">✎</button>
+                       <button class="action-btn" title="Excluir" onclick="window.deleteMedia(${section.id}, ${index})">🗑</button>
+                     </div>` 
+                  : '';
 
-          return `
-          <div class="media-card">
-            ${mediaElement}
-            <div class="media-info">
-              <div class="media-name" title="${file}">${file}</div>
-            </div>
-            ${actions}
-          </div>`;
-      }).join('');
+              return `
+              <div class="media-card">
+                ${mediaElement}
+                <div class="media-info">
+                  <div class="media-name" title="${file}">${file}</div>
+                </div>
+                ${actions}
+              </div>`;
+          }).join('');
+      }
   }
   
-  galleryModal.classList.add('active');
-}
-
-// Ações do Coordenador (Visuais - Front-end)
-function deleteMedia(sectionId, mediaIndex) {
-  if (confirm("Coordenador: Tem certeza que deseja excluir este arquivo permanentemente?")) {
-      const section = sections.find(s => s.id === sectionId);
-      section.media.splice(mediaIndex, 1);
-      openGallery(sectionId); 
+  if (galleryModal) {
+      galleryModal.classList.add('active');
+      galleryModal.style.pointerEvents = 'auto'; // Ativa cliques apenas quando a galeria abrir
   }
 }
-window.deleteMedia = deleteMedia;
 
-function editMedia(sectionId, mediaIndex) {
+window.deleteMedia = function(sectionId, mediaIndex) {
+  if (confirm("Coordenador: Tem certeza que deseja excluir este arquivo permanentemente?")) {
+      const section = sections.find(s => s.id === sectionId);
+      if (section) {
+          section.media.splice(mediaIndex, 1);
+          openGallery(sectionId); 
+      }
+  }
+};
+
+window.editMedia = function(sectionId, mediaIndex) {
   const section = sections.find(s => s.id === sectionId);
+  if (!section) return;
   const newName = prompt("Coordenador: Digite o novo nome do arquivo:", section.media[mediaIndex]);
   if (newName && newName.trim() !== "") {
       section.media[mediaIndex] = newName.trim();
       openGallery(sectionId); 
   }
-}
-window.editMedia = editMedia;
+};
 
-document.getElementById('uploadMedia').addEventListener('change', (e) => {
+document.getElementById('uploadMedia')?.addEventListener('change', (e) => {
   if(e.target.files.length > 0 && currentSectionForGallery !== null) {
       alert(`Coordenador: Upload de ${e.target.files.length} arquivo(s) simulado com sucesso na Seção ${currentSectionForGallery}.`);
       const section = sections.find(s => s.id === currentSectionForGallery);
-      Array.from(e.target.files).forEach(file => section.media.push(file.name));
-      openGallery(currentSectionForGallery);
+      if (section) {
+          Array.from(e.target.files).forEach(file => section.media.push(file.name));
+          openGallery(currentSectionForGallery);
+      }
   }
 });
+
+// ==========================================
+// INTEGRAÇÃO API GEMINI (Mantida isolada para evitar erros)
+// ==========================================
+const chatToggle = document.getElementById('chatToggle');
+const chatPanel = document.getElementById('chatPanel');
+const closeChat = document.getElementById('closeChat');
+const chatMessages = document.getElementById('chatMessages');
+const aiInput = document.getElementById('aiInput');
+const sendBtn = document.getElementById('sendBtn');
+
+if (chatToggle && chatPanel) {
+  const GEMINI_API_KEY = 'AQ.Ab8RN6IsDTmzkMajJ29JCFixs70Ryg0A9bm5FKXM4cgM6QG4Yg'; 
+
+  chatToggle.addEventListener('click', () => {
+      chatPanel.classList.add('active');
+      chatPanel.style.pointerEvents = 'auto';
+  });
+  closeChat.addEventListener('click', () => {
+      chatPanel.classList.remove('active');
+      chatPanel.style.pointerEvents = 'none';
+  });
+
+  function addMessage(text, sender) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${sender}-message`;
+    msgDiv.innerHTML = text.replace(/\n/g, '<br>'); 
+    if (chatMessages) {
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  }
+
+  const systemContext = `Você é o Assistente da iCelera. Base de Conhecimento: ${JSON.stringify(sections)}`;
+
+  async function fetchGeminiResponse(userPrompt) {
+    addMessage(userPrompt, 'user');
+    if (aiInput) aiInput.value = '';
+    
+    const loadingId = Date.now();
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'message ai-message';
+    loadingDiv.id = `load-${loadingId}`;
+    loadingDiv.innerHTML = '<i>Analisando...</i>';
+    if (chatMessages) {
+        chatMessages.appendChild(loadingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: systemContext + "\n\nPergunta: " + userPrompt }] }],
+            generationConfig: { temperature: 0.2 }
+          })
+        });
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+
+        let aiText = data.candidates[0].content.parts[0].text;
+        aiText = aiText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+        document.getElementById(`load-${loadingId}`)?.remove();
+        addMessage(aiText, 'ai');
+    } catch (error) {
+        document.getElementById(`load-${loadingId}`)?.remove();
+        addMessage("⚠️ Erro de conexão: " + error.message, 'ai');
+    }
+  }
+
+  sendBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const text = aiInput?.value.trim();
+    if(text) fetchGeminiResponse(text);
+  });
+
+  aiInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const text = aiInput?.value.trim();
+      if(text) fetchGeminiResponse(text);
+    }
+  });
+}
