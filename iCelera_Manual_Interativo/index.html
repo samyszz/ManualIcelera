@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Manual Interativo de Suporte Técnico e Operacional iCelera">
   <title>Manual de Suporte Técnico | iCelera</title>
+  <!-- Favicon com a logo da iCelera -->
+  <link rel="icon" type="image/jpeg" href="assets/logo-icelera.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="locked">
   <div class="app-shell">
     
     <!-- Topbar com Botão Hamburger -->
@@ -22,11 +24,11 @@
         </a>
       </div>
 
-<div class="topbar-actions">
-  <button class="icon-btn" id="themeBtn" title="Alternar modo escuro">◐</button>
-  <button class="icon-btn" id="fontBtn" title="Aumentar tamanho do texto">A+</button>
-  <button class="icon-btn hidden" id="logoutBtn" title="Sair do Sistema" style="color: #e74c3c;">➜]</button>
-</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeBtn" title="Alternar modo escuro">◐</button>
+        <button class="icon-btn" id="fontBtn" title="Aumentar tamanho do texto">A+</button>
+        <button class="icon-btn hidden" id="logoutBtn" title="Sair do Sistema" style="color: #e74c3c;">⎋</button>
+      </div>
     </header>
 
     <!-- Sidebar Oculta (Off-canvas) para os Dropdowns -->
@@ -132,21 +134,18 @@
       </div>
     </div>
 
-  </div>
-
-    <!-- Modal de Login -->
-    <div class="modal-overlay" id="loginModal">
+    <!-- Modal de Login (Trava de Acesso) -->
+    <div class="modal-overlay active" id="loginModal">
       <div class="modal-content soft-modal">
-        <button class="close-modal" id="closeLoginBtn">✕</button>
-        <h3>Bem vindo á Icelera!</h3>
-        <p style="color: var(--muted); margin-bottom: 20px;">Selecione seu perfil e preencha seus dados para continuar</p>
+        <h3>Bem vindo á iCelera!</h3>
+        <p style="color: var(--muted); margin-bottom: 20px; font-size: 13px;">Selecione seu perfil e preencha seus dados para continuar</p>
         
         <div class="login-tabs">
           <button class="tab-btn active" data-role="tecnico">Técnico</button>
           <button class="tab-btn" data-role="coordenador">Coordenador</button>
         </div>
         
-        <input type="password" id="loginPassword" placeholder="Digite a senha..." class="soft-input">
+        <input type="password" id="loginPassword" placeholder="Digite sua senha..." class="soft-input">
         <button class="primary-btn" id="submitLoginBtn">Entrar</button>
         <p id="loginError" class="error-text hidden">Senha incorreta.</p>
       </div>
@@ -160,13 +159,16 @@
           <button class="close-modal" id="closeGalleryBtn">✕</button>
         </div>
         
-        <!-- Ferramentas do Coordenador (Oculto por padrão) -->
+        <!-- Ferramentas do Coordenador -->
         <div id="coordinatorTools" class="coordinator-tools hidden">
-          <div class="upload-area">
+          <div class="upload-area" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
             <input type="file" id="uploadMedia" multiple class="hidden">
             <label for="uploadMedia" class="upload-btn">
-              <span>+</span> Fazer Upload de Mídia
+              <span>+</span> Upload de Mídia
             </label>
+            <button class="upload-btn" id="openSectionModalBtn" style="background: var(--primary-dark); color: white;">
+              <span>+</span> Criar Seção / Subseção
+            </button>
           </div>
         </div>
 
@@ -176,8 +178,66 @@
       </div>
     </div>
 
+    <!-- Modal de Criação de Seção / Subseção (Coordenador) -->
+    <div class="modal-overlay" id="sectionManagerModal">
+      <div class="modal-content soft-modal" style="max-width: 500px;">
+        <button class="close-modal" id="closeSectionModalBtn">✕</button>
+        <h3 id="modalManagerTitle">Gerenciar Manual</h3>
+        <p style="color: var(--muted); margin-bottom: 20px; font-size: 13px;">Adicione uma nova seção principal ou insira um novo procedimento (subseção) em uma seção existente.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+          <div>
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Tipo de Ação:</label>
+            <select id="actionTypeSelect" class="soft-input" style="height: 50px; cursor: pointer;">
+              <option value="new_section">Criar Nova Seção Principal</option>
+              <option value="new_procedure">Adicionar Subseção (Procedimento) em Seção Existente</option>
+            </select>
+          </div>
+
+          <!-- Campos para Nova Seção -->
+          <div id="sectionFields">
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Título da Seção:</label>
+            <input type="text" id="newSectionTitle" placeholder="Ex.: Integração de Relógios de Ponto" class="soft-input">
+            
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Descrição Curta:</label>
+            <input type="text" id="newSectionDesc" placeholder="Ex.: Procedimentos de sincronização e rede." class="soft-input">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Escolha um Ícone:</label>
+            <select id="newSectionIcon" class="soft-input" style="height: 50px; cursor: pointer; font-size: 18px;">
+              <option value="⚙">⚙ (Engrenagem / Sistema)</option>
+              <option value="⌁">⌁ (Conectividade / Rede)</option>
+              <option value="▣">▣ (Cartão / Armazenamento)</option>
+              <option value="▥">▥ (Relatório / Laudo)</option>
+              <option value="!">! (Erros / Alerta)</option>
+              <option value="⌂">⌂ (Ambiente / Instalação)</option>
+              <option value="☁">☁ (Nuvem / Sincronização)</option>
+              <option value="🔒">🔒 (Segurança / Acesso)</option>
+            </select>
+          </div>
+
+          <!-- Campos para Nova Subseção -->
+          <div id="procedureFields" class="hidden">
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Selecione a Seção Destino:</label>
+            <select id="targetSectionSelect" class="soft-input" style="height: 50px; cursor: pointer;"></select>
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Título da Subseção:</label>
+            <input type="text" id="newProcTitle" placeholder="Ex.: 1.7 — Configuração de Switch" class="soft-input">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Introdução / Resumo:</label>
+            <input type="text" id="newProcIntro" placeholder="Ex.: Parâmetros iniciais de porta." class="soft-input">
+
+            <label style="font-size: 12px; font-weight: 700; color: var(--primary-dark); display: block; margin-bottom: 5px;">Passos (um por linha):</label>
+            <textarea id="newProcSteps" placeholder="Passo 1&#10;Passo 2&#10;Passo 3" class="soft-input" style="height: 100px; resize: none; padding-top: 12px;"></textarea>
+          </div>
+
+          <button class="primary-btn" id="saveNewItemBtn" style="margin-top: 10px;">Salvar no Manual</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Importante: script como module para rodar o Firebase -->
   <script type="module" src="script.js"></script>
-
-
 </body>
 </html>

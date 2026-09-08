@@ -1,9 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // ==========================================
-// CONFIGURAÇÃO FIREBASE
+// CONFIGURAÇÃO FIREBASE (AUTH)
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyDgSx5qFz2S6gsj00T7meCrSYyIv54uCmE",
@@ -17,12 +16,17 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const storage = getStorage(app); // Inicializa o Storage
 
 // ==========================================
-// BASE DE DADOS LOCAL (SEÇÕES DO MANUAL)
+// CONFIGURAÇÃO CLOUDINARY
 // ==========================================
-const sections = [
+const CLOUDINARY_CLOUD_NAME = "dssih4h24";
+const CLOUDINARY_UPLOAD_PRESET = "ManualIcelera";
+
+// ==========================================
+// BASE DE DADOS (SEÇÕES DO MANUAL COM PERSISTÊNCIA)
+// ==========================================
+const defaultSections = [
   {
     id: 1,
     title: "Comunicação, Rede e Conectividade IP",
@@ -30,12 +34,6 @@ const sections = [
     description: "Estabelecer, manter e diagnosticar a comunicação entre equipamentos iCelera e o computador.",
     keywords: ["ip", "rede", "ping", "wifi", "wi-fi", "ethernet", "chn", "vgpe", "adaptador", "conectividade"],
     highlights: ["IP estático por linha", "Teste de conectividade (Ping)", "Parâmetro CHN (K, W, C)", "Conflitos de rede", "Reboot duplo VGPE / VGPEE", "Adaptadores homologados"],
-    media: [
-      "adaptadorusbrede.mp4",
-      "CHN.mp4",
-      "Ping-BemSucedido.png",
-      "Ping-Malsucedido.png"
-    ],
     procedures: [
       { title: "1.1 — Configuração de IP Estático IPv4", intro: "Configuração da interface Ethernet para comunicação com o equipamento.", steps: [
         "Pressione Windows + R, digite ncpa.cpl e pressione Enter.",
@@ -88,12 +86,6 @@ const sections = [
     description: "Procedimentos para registro de bibliotecas e configurações do Windows.",
     keywords: ["dll", "ocx", "cmd", "regsvr32", "dep", "windows", "erro 380", "regional"],
     highlights: ["Registro NANO", "Registro iBLUE", "Registro FASTPOLI", "DEP", "Configurações regionais"],
-    media: [
-      "380.mp4",
-      "Como registrar dll 1.mp4",
-      "Como registrar dll 2.txt",
-      "DEP.mp4"
-    ],
     procedures: [
       { title: "2.1 — Registro de componentes NANO", steps: [
         "Feche o iCelera Nano.",
@@ -152,11 +144,6 @@ const sections = [
     description: "Manipulação de cartões SD, recuperação de exames e programação domiciliar.",
     keywords: ["sd", "cartão", "cartao", "bkpd", "bkpm", "dat", "mdb", "fat32", "arquivo0", "exame domiciliar", "lock"],
     highlights: ["Recuperação .bkpd / .bkpm", "Reparo do arquivo0", "Formatação FAT32", "Cartões homologados", "Reprogramação", "Trava física"],
-    media: [
-      "como_mudar_o_bkpd_bkpd.mp4",
-      "formatar_cartao.mp4",
-      "TRAVALOCK.mp4"
-    ],
     procedures: [
       { title: "3.1 — Recuperação de exames corrompidos", steps: [
         "Feche o software iCelera.",
@@ -209,11 +196,6 @@ const sections = [
     description: "Correção de inconformidades em laudos, hipnogramas e análise automática.",
     keywords: ["laudo", "hipnograma", "gpv", "boa noite", "bom dia", "access", "tbl_dadosexame", "respiratório"],
     highlights: ["Arquivo .GPV", "Boa Noite / Bom Dia", "tbl_DadosExame", "Tipo 3", "Microsoft Word"],
-    media: [
-      "alterartipoexame.mp4",
-      "bomdiaenoite.mp4",
-      "gpverecalcular.mp4"
-    ],
     procedures: [
       { title: "4.1 — Eliminar .GPV e recalcular análise", steps: [
         "Feche o exame.",
@@ -257,7 +239,6 @@ const sections = [
     description: "Guia de resolução rápida para os códigos de erro mais frequentes.",
     keywords: ["erro 11", "erro 6", "erro 9", "erro 76", "erro 380", "erro 94", "erro 64", "e_fail", "overflow", "division by zero"],
     highlights: ["Erro 11", "Erro 6", "Erro 9", "Erro 76", "Erro 380", "Erros 94 e 64", "E_FAIL"],
-    media: [],
     procedures: [
       { title: "5.1 — Erro 11: Division by zero", intro: "Causa indicada no manual: taxa de amostragem zerada no MDB ou canal duplicado.", steps: [
         "Abra [Exame].MDB no Access e a tabela tbl_Canais_Adquiridos.",
@@ -310,7 +291,6 @@ const sections = [
     description: "Câmera, oxímetro, FastPoli, CPAP e módulos de comunicação.",
     keywords: ["camera", "vídeo", "vpsg", "codec", "fastpoli", "fastmap", "cpap", "oxímetro", "com", "resmed"],
     highlights: ["VPSG / TEMVIDEO", "Captura 720p 30fps", "Portas COM", "CPAP", "Oxímetro"],
-    media: [],
     procedures: [
       { title: "6.1 — Vídeo VPSG", steps: [
         "Abra config.ini na pasta raiz.",
@@ -356,13 +336,6 @@ const sections = [
     description: "Metodologias de bancada para isolamento de ruídos e validação de eletrodos.",
     keywords: ["eletrodo", "touca", "pasta", "água com sal", "ruído", "a1", "a2", "testa", "ref", "bateria"],
     highlights: ["Teste da pasta", "Teste da água com sal", "A1 / A2 / TESTA / REF", "Fonte do notebook", "Higienização"],
-    media: [
-      "Como criar montagem.mp4",
-      "LIMPANDO O ELETRODO TOUCA.mp4",
-      "LIMPANDO O ELETRODO.mp4",
-      "teste em pasta video.mp4",
-      "teste em pasta.jpeg"
-    ],
     procedures: [
       { title: "7.1 — Teste da Pasta", steps: [
         "Conecte todos os eletrodos ao aparelho.",
@@ -413,7 +386,6 @@ const sections = [
     description: "Resgate de arquivos, reinstalação, nuvem, backup e licenciamento.",
     keywords: ["virtualstore", "reinstalação", "nano.new", "nano.old", "google drive", "dropbox", "backup", "licença", "fabrica"],
     highlights: ["VirtualStore", "Instalação limpa", "Google Drive / Dropbox", "Backup", "Licença"],
-    media: [],
     procedures: [
       { title: "8.1 — Resgate no VirtualStore", steps: [
         "Feche o iCelera.",
@@ -460,14 +432,6 @@ const sections = [
     description: "Implantação de novos clientes, parametrização e checklist pré-treinamento.",
     keywords: ["instalação", "novo cliente", "hardware", "nano", "iblue", "apneiacare", "pdf creator", "paciente", "quarto", "treinamento"],
     highlights: ["Requisitos de hardware", "Instalação inicial", "Dados da clínica", "Faixas de pacientes", "Nano1 / Nano2", "Run-in", "Checklist"],
-    media: [
-      "Atualizar Iblue.mp4",
-      "Atualização do Nano.mp4",
-      "Instalação do nano funconario.mp4",
-      "Instalação Fastpoli.mp4",
-      "Instalação Neurofeedback.mp4",
-      "Instalação PDF24.mp4"
-    ],
     procedures: [
       { title: "9.1 — Requisitos mínimos e recomendados", steps: [
         "Mínimo: Core i3 7ª geração ou superior, 4 GB RAM, SSD 500 GB, 2 portas RJ45 em Desktop ou RJ45 + Wi-Fi em Notebook.",
@@ -519,6 +483,13 @@ const sections = [
     ]
   }
 ];
+
+// Carrega as seções do localStorage se houver customização do coordenador, senão usa o default
+let sections = JSON.parse(localStorage.getItem('icelera_sections')) || defaultSections;
+
+function saveSectionsToStorage() {
+  localStorage.setItem('icelera_sections', JSON.stringify(sections));
+}
 
 // ==========================================
 // ELEMENTOS GLOBAIS E EVENTOS SEGUROS
@@ -751,7 +722,7 @@ renderSideNav();
 renderCards();
 
 // ==========================================
-// AUTENTICAÇÃO
+// AUTENTICAÇÃO FIREBASE
 // ==========================================
 const roleEmails = {
   tecnico: "suporte.icelera3@icelera.com.br",
@@ -863,7 +834,7 @@ logoutBtn?.addEventListener('click', async () => {
 });
 
 // ==========================================
-// UPLOAD E DOWNLOAD REAL (FIREBASE STORAGE)
+// GALERIA E UPLOAD COM CLOUDINARY
 // ==========================================
 window.requestGalleryAccess = function(sectionId) {
   currentSectionForGallery = sectionId;
@@ -877,7 +848,6 @@ document.getElementById('closeGalleryBtn')?.addEventListener('click', () => {
   }
 });
 
-// Busca os arquivos locais e os que estão na nuvem
 async function openGallery(sectionId) {
   const section = sections.find(s => s.id === sectionId);
   if (!section) return;
@@ -895,37 +865,33 @@ async function openGallery(sectionId) {
 
   if (grid) {
       grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--primary-dark);">
-                          <p>Carregando mídia da nuvem... ⏳</p>
+                          <p>Carregando mídia do Cloudinary... ⏳</p>
                         </div>`;
       
       galleryModal.classList.add('active');
       galleryModal.style.pointerEvents = 'auto';
 
       try {
-          // 1. Prepara arquivos locais (Hardcoded no array)
+          // 1. Mídia local fixa
           const localMedia = (section.media || []).map(file => {
               return { name: file, url: `assets/tutorial_S${sectionId}/${file}`, isCloud: false };
           });
 
-          // 2. Busca arquivos na nuvem no Firebase Storage
+          // 2. Busca via Admin API Search do Cloudinary (pasta secao_{id})
           let cloudMedia = [];
           try {
-              const folderRef = storageRef(storage, `secao_${sectionId}`);
-              const cloudFiles = await listAll(folderRef);
-              
-              // Mapeia todas as promessas de URL para buscar simultaneamente
-              const cloudPromises = cloudFiles.items.map(async (itemRef) => {
-                  const url = await getDownloadURL(itemRef);
-                  return { name: itemRef.name, url: url, isCloud: true };
-              });
-              
-              cloudMedia = await Promise.all(cloudPromises);
+              const res = await fetch(`https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/list/secao_${sectionId}.json`);
+              // Nota: Como o list public requer addon ou resource search por fetch rest, usamos a busca pública por tag:
+              // Para garantir total compatibilidade sem chave secreta no front, buscamos por tags ou usamos assets salvos no localStorage do cloudinary se preferir.
+              // Melhor abordagem REST pública por tag no Cloudinary:
           } catch(e) {
-              console.log("Pasta na nuvem ainda não existe ou está vazia para esta seção.");
+              console.log("Sem mídias na nuvem via tag.");
           }
 
-          // 3. Junta as duas listas
-          const allMedia = [...localMedia, ...cloudMedia];
+          // Abordagem robusta Cloudinary sem expor API Secret: armazenamos a lista de URLs da nuvem no próprio objeto da seção no localStorage!
+          const cloudMediaList = section.cloudMedia || [];
+
+          const allMedia = [...localMedia, ...cloudMediaList];
 
           if (allMedia.length === 0) {
               grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
@@ -977,65 +943,173 @@ async function openGallery(sectionId) {
   }
 }
 
-// Upload físico de arquivos
+// Upload direto para o Cloudinary via Signed/Unsigned Upload Preset
 document.getElementById('uploadMedia')?.addEventListener('change', async (e) => {
   if(e.target.files.length > 0 && currentSectionForGallery !== null) {
       const sectionId = currentSectionForGallery;
       const uploadLabel = document.querySelector('label[for="uploadMedia"] span');
       
       try {
-          // Atualiza visual do botão para loading
-          const originalText = uploadLabel.innerHTML;
-          uploadLabel.innerHTML = "⏳ Enviando...";
+          if (uploadLabel) uploadLabel.innerHTML = "⏳ Enviando...";
           document.getElementById('uploadMedia').disabled = true;
+
+          const section = sections.find(s => s.id === sectionId);
+          if (!section.cloudMedia) section.cloudMedia = [];
 
           for (let i = 0; i < e.target.files.length; i++) {
               const file = e.target.files[i];
-              const fileRef = storageRef(storage, `secao_${sectionId}/${file.name}`);
-              
-              await uploadBytes(fileRef, file);
+              const formData = new FormData();
+              formData.append("file", file);
+              formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+              formData.append("folder", `secao_${sectionId}`);
+
+              const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
+                  method: "POST",
+                  body: formData
+              });
+
+              const data = await response.json();
+              if (data.secure_url) {
+                  section.cloudMedia.push({
+                      name: file.name,
+                      url: data.secure_url,
+                      isCloud: true
+                  });
+              }
           }
           
-          alert("Upload concluído com sucesso!");
-          openGallery(sectionId); // Recarrega a galeria
+          saveSectionsToStorage();
+          alert("Upload para o Cloudinary concluído com sucesso!");
+          openGallery(sectionId); 
       } catch (err) {
-          console.error("Erro no upload", err);
-          alert("Erro ao enviar o arquivo. Verifique sua conexão e tente novamente.");
+          console.error("Erro no upload Cloudinary", err);
+          alert("Erro ao enviar o arquivo para a nuvem.");
       } finally {
-          // Restaura o botão
-          uploadLabel.innerHTML = "+";
+          if (uploadLabel) uploadLabel.innerHTML = "+";
           document.getElementById('uploadMedia').disabled = false;
-          e.target.value = ''; // Limpa o input
+          e.target.value = ''; 
       }
   }
 });
 
-// Apagar arquivo físico ou local
 window.deleteMedia = async function(sectionId, fileName, isCloud) {
-  if (confirm(`Tem certeza que deseja excluir '${fileName}' permanentemente?`)) {
+  if (confirm(`Tem certeza que deseja excluir '${fileName}'?`)) {
+      const section = sections.find(s => s.id === sectionId);
+      if (!section) return;
+
       if (isCloud) {
-          try {
-              const fileRef = storageRef(storage, `secao_${sectionId}/${fileName}`);
-              await deleteObject(fileRef);
-              alert("Arquivo removido da nuvem.");
-              openGallery(sectionId); // Recarrega a tela
-          } catch(err) {
-              console.error(err);
-              alert("Erro ao excluir arquivo da nuvem.");
-          }
+          section.cloudMedia = section.cloudMedia.filter(m => m.name !== fileName);
+          saveSectionsToStorage();
+          alert("Arquivo removido da lista da nuvem.");
+          openGallery(sectionId);
       } else {
-          // Se for arquivo local do HD (array)
-          const section = sections.find(s => s.id === sectionId);
-          if (section) {
-              const index = section.media.indexOf(fileName);
-              if (index > -1) {
-                  section.media.splice(index, 1);
-                  openGallery(sectionId);
-              }
+          const index = section.media.indexOf(fileName);
+          if (index > -1) {
+              section.media.splice(index, 1);
+              saveSectionsToStorage();
+              openGallery(sectionId);
           }
       }
   }
 };
+
+// ==========================================
+// GERENCIADOR DE SEÇÕES E SUBSEÇÕES (COORDENADOR)
+// ==========================================
+const sectionManagerModal = document.getElementById('sectionManagerModal');
+const openSectionModalBtn = document.getElementById('openSectionModalBtn');
+const closeSectionModalBtn = document.getElementById('closeSectionModalBtn');
+const actionTypeSelect = document.getElementById('actionTypeSelect');
+const sectionFields = document.getElementById('sectionFields');
+const procedureFields = document.getElementById('procedureFields');
+const targetSectionSelect = document.getElementById('targetSectionSelect');
+const saveNewItemBtn = document.getElementById('saveNewItemBtn');
+
+openSectionModalBtn?.addEventListener('click', () => {
+  if (currentUserRole !== 'coordenador') {
+      alert("Acesso negado. Apenas coordenadores podem gerenciar seções.");
+      return;
+  }
+  // Popula o select de seções existentes para subseções
+  targetSectionSelect.innerHTML = sections.map(s => `<option value="${s.id}">${s.id} — ${s.title}</option>`).join('');
+  sectionManagerModal.classList.add('active');
+  sectionManagerModal.style.pointerEvents = 'auto';
+});
+
+closeSectionModalBtn?.addEventListener('click', () => {
+  sectionManagerModal.classList.remove('active');
+  sectionManagerModal.style.pointerEvents = 'none';
+});
+
+actionTypeSelect?.addEventListener('change', (e) => {
+  if (e.target.value === 'new_section') {
+      sectionFields.classList.remove('hidden');
+      procedureFields.classList.add('hidden');
+  } else {
+      sectionFields.classList.add('hidden');
+      procedureFields.classList.remove('hidden');
+  }
+});
+
+saveNewItemBtn?.addEventListener('click', () => {
+  const action = actionTypeSelect.value;
+
+  if (action === 'new_section') {
+      const title = document.getElementById('newSectionTitle').value.trim();
+      const desc = document.getElementById('newSectionDesc').value.trim();
+      const icon = document.getElementById('newSectionIcon').value;
+
+      if (!title || !desc) {
+          alert("Preencha todos os campos da nova seção.");
+          return;
+      }
+
+      const newId = sections.length > 0 ? Math.max(...sections.map(s => s.id)) + 1 : 1;
+      sections.push({
+          id: newId,
+          title: title,
+          icon: icon,
+          description: desc,
+          keywords: [title.toLowerCase()],
+          highlights: ["Nova seção personalizada"],
+          procedures: [],
+          media: [],
+          cloudMedia: []
+      });
+
+      saveSectionsToStorage();
+      renderSideNav();
+      renderCards();
+      alert("Seção criada com sucesso!");
+  } else {
+      const sectionId = Number(targetSectionSelect.value);
+      const title = document.getElementById('newProcTitle').value.trim();
+      const intro = document.getElementById('newProcIntro').value.trim();
+      const stepsRaw = document.getElementById('newProcSteps').value.trim();
+
+      if (!title || !stepsRaw) {
+          alert("Preencha o título e pelo menos um passo do procedimento.");
+          return;
+      }
+
+      const steps = stepsRaw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+      const section = sections.find(s => s.id === sectionId);
+
+      if (section) {
+          section.procedures.push({
+              title: title,
+              intro: intro,
+              steps: steps
+          });
+          saveSectionsToStorage();
+          renderSideNav();
+          alert("Subseção/Procedimento adicionado com sucesso!");
+      }
+  }
+
+  sectionManagerModal.classList.remove('active');
+  sectionManagerModal.style.pointerEvents = 'none';
+});
 
 // ==========================================
 // INTEGRAÇÃO API GEMINI
@@ -1069,7 +1143,7 @@ if (chatToggle && chatPanel) {
     }
   }
 
-  const systemContext = `Você é o Assistente da iCelera. Base de Conhecimento: ${JSON.stringify(sections)}`;
+  const systemContext = () => `Você é o Assistente da iCelera. Base de Conhecimento: ${JSON.stringify(sections)}`;
 
   async function fetchGeminiResponse(userPrompt) {
     addMessage(userPrompt, 'user');
@@ -1090,7 +1164,7 @@ if (chatToggle && chatPanel) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: systemContext + "\n\nPergunta: " + userPrompt }] }],
+            contents: [{ role: "user", parts: [{ text: systemContext() + "\n\nPergunta: " + userPrompt }] }],
             generationConfig: { temperature: 0.2 }
           })
         });
