@@ -134,23 +134,6 @@
       </div>
     </div>
 
-<!-- Modal de Login (Fora do app-shell para não borrar) -->
-    <div class="modal-overlay active" id="loginModal">
-      <div class="modal-content soft-modal">
-        <h3>Bem vindo á iCelera!</h3>
-        <p style="color: var(--muted); margin-bottom: 20px; font-size: 13px;">Selecione seu perfil e preencha seus dados para continuar</p>
-        
-        <div class="login-tabs">
-          <button class="tab-btn active" data-role="tecnico">Técnico</button>
-          <button class="tab-btn" data-role="coordenador">Coordenador</button>
-        </div>
-        
-        <input type="password" id="loginPassword" placeholder="Digite sua senha..." class="soft-input">
-        <button class="primary-btn" id="submitLoginBtn">Entrar</button>
-        <p id="loginError" class="error-text hidden">Senha incorreta.</p>
-      </div>
-    </div>
-
     <!-- Modal da Galeria -->
     <div class="modal-overlay" id="galleryModal">
       <div class="modal-content gallery-modal soft-modal">
@@ -236,6 +219,23 @@
     </div>
 
   </div> <!-- Fim da div .app-shell -->
+
+  <!-- Modal de Login (Fora do app-shell para não borrar) -->
+  <div class="modal-overlay active" id="loginModal">
+    <div class="modal-content soft-modal">
+      <h3>Bem vindo á iCelera!</h3>
+      <p style="color: var(--muted); margin-bottom: 20px; font-size: 13px;">Selecione seu perfil e preencha seus dados para continuar</p>
+
+      <div class="login-tabs">
+        <button class="tab-btn active" data-role="tecnico">Técnico</button>
+        <button class="tab-btn" data-role="coordenador">Coordenador</button>
+      </div>
+
+      <input type="password" id="loginPassword" placeholder="Digite sua senha..." class="soft-input">
+      <button class="primary-btn" id="submitLoginBtn">Entrar</button>
+      <p id="loginError" class="error-text hidden">Senha incorreta.</p>
+    </div>
+  </div>
 
 
 
