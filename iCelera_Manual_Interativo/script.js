@@ -897,17 +897,6 @@ async function openGallery(sectionId) {
               return { name: file, url: `assets/tutorial_S${sectionId}/${file}`, isCloud: false };
           });
 
-          // 2. Busca via Admin API Search do Cloudinary (pasta secao_{id})
-          let cloudMedia = [];
-          try {
-              const res = await fetch(`https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/list/secao_${sectionId}.json`);
-              // Nota: Como o list public requer addon ou resource search por fetch rest, usamos a busca pública por tag:
-              // Para garantir total compatibilidade sem chave secreta no front, buscamos por tags ou usamos assets salvos no localStorage do cloudinary se preferir.
-              // Melhor abordagem REST pública por tag no Cloudinary:
-          } catch(e) {
-              console.log("Sem mídias na nuvem via tag.");
-          }
-
           // Abordagem robusta Cloudinary sem expor API Secret: armazenamos a lista de URLs da nuvem no próprio objeto da seção no localStorage!
           const cloudMediaList = section.cloudMedia || [];
 
