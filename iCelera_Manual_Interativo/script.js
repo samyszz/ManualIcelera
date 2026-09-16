@@ -761,7 +761,7 @@ async function authenticate() {
       submitLoginBtn.disabled = true;
   }
 
-  // Timeout de segurança: se o Firebase demorar mais de 8 segundos, destrava o botão
+  // Timeout de segurança
   const safetyTimeout = setTimeout(() => {
       if (submitLoginBtn && submitLoginBtn.textContent.includes("Autenticando")) {
           submitLoginBtn.textContent = "Entrar";
@@ -854,7 +854,7 @@ logoutBtn?.addEventListener('click', async () => {
 });
 
 // ==========================================
-// GALERIA E UPLOAD COM CLOUDINARY
+// GALERIA E UPLOAD COM CLOUDINARY PÚBLICO
 // ==========================================
 window.requestGalleryAccess = function(sectionId) {
   currentSectionForGallery = sectionId;
@@ -885,74 +885,93 @@ async function openGallery(sectionId) {
 
   if (grid) {
       grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--primary-dark);">
-                          <p>Carregando mídia do Cloudinary... ⏳</p>
+                          <p>Buscando lista na nuvem... ☁️⏳</p>
                         </div>`;
       
       galleryModal.classList.add('active');
       galleryModal.style.pointerEvents = 'auto';
 
+      let cloudMedia = [];
       try {
-          // 1. Mídia local fixa
-          const localMedia = (section.media || []).map(file => {
-              return { name: file, url: `assets/tutorial_S${sectionId}/${file}`, isCloud: false };
-          });
-
-          // Abordagem robusta Cloudinary sem expor API Secret: armazenamos a lista de URLs da nuvem no próprio objeto da seção no localStorage!
-          const cloudMediaList = section.cloudMedia || [];
-
-          const allMedia = [...localMedia, ...cloudMediaList];
-
-          if (allMedia.length === 0) {
-              grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
-                                  <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
-                                  <p style="color:var(--muted);">Nenhuma mídia disponível para esta seção.</p>
+          // Busca a lista atualizada gerada pela TAG do Cloudinary
+          const res = await fetch(`https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/list/secao_${sectionId}.json`);
+          
+          if (res.ok) {
+              const data = await res.json();
+              cloudMedia = data.resources.map(item => ({
+                  name: item.public_id.split('/').pop() + '.' + item.format,
+                  url: `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v${item.version}/${item.public_id}.${item.format}`,
+                  isCloud: true
+              }));
+          } else if (res.status === 401) {
+              grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: #e74c3c;">
+                                  <h3>Erro 401: Acesso Negado 🔒</h3>
+                                  <p style="margin-top:10px;">Você precisa liberar a leitura pública no painel do Cloudinary.<br>Vá em <b>Settings > Security</b> e desmarque a opção <b>"Resource list"</b>.</p>
                                 </div>`;
-          } else {
-              grid.innerHTML = allMedia.map((fileObj, index) => {
-                  const extension = fileObj.name.split('.').pop().toLowerCase();
-                  const isVideo = ['mp4', 'webm', 'mov'].includes(extension);
-                  const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
-                  
-                  let mediaElement = '';
-                  if (isVideo) {
-                    mediaElement = `<video src="${fileObj.url}" controls preload="metadata"></video>`;
-                  } else if (isImage) {
-                    mediaElement = `<img src="${fileObj.url}" alt="${fileObj.name}" loading="lazy">`;
-                  } else {
-                    mediaElement = `<div style="height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-soft); color: var(--primary-dark);">
-                                      <a href="${fileObj.url}" target="_blank" style="text-decoration:none; color:inherit; text-align:center;">
-                                        <span style="font-size:40px; margin-bottom: 5px; display:block;">📄</span>
-                                        <span style="font-size: 12px; font-weight: bold;">Baixar Documento</span>
-                                      </a>
-                                    </div>`;
-                  }
-
-                  const actions = currentUserRole === 'coordenador' 
-                      ? `<div class="media-actions">
-                           <button class="action-btn" title="Excluir" onclick="window.deleteMedia(${section.id}, '${fileObj.name}', ${fileObj.isCloud})">🗑</button>
-                         </div>` 
-                      : '';
-
-                  return `
-                  <div class="media-card">
-                    ${mediaElement}
-                    <div class="media-info">
-                      <div class="media-name" title="${fileObj.name}">
-                         ${fileObj.isCloud ? '☁️ ' : ''}${fileObj.name}
-                      </div>
-                    </div>
-                    ${actions}
-                  </div>`;
-              }).join('');
+              return; 
+          } else if (res.status !== 404) {
+              console.warn("Cloudinary retornou status desconhecido:", res.status);
           }
       } catch (error) {
-          grid.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar galeria.</p>`;
-          console.error(error);
+          console.error("Erro no fetch do Cloudinary:", error);
+          grid.innerHTML = `<p style="color:red; text-align:center;">Erro na conexão com o servidor de imagens.</p>`;
+          return;
+      }
+
+      // Preserva arquivos locais antigos se houver (da base de dados base)
+      const localMedia = (section.media || []).map(file => {
+          return { name: file, url: `assets/tutorial_S${sectionId}/${file}`, isCloud: false };
+      });
+
+      const allMedia = [...localMedia, ...cloudMedia];
+
+      if (allMedia.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; background: var(--bg); border-radius: 20px;">
+                              <span style="font-size: 30px; margin-bottom: 10px; display: block;">📭</span>
+                              <p style="color:var(--muted);">Nenhuma mídia na nuvem para esta seção.</p>
+                            </div>`;
+      } else {
+          grid.innerHTML = allMedia.map((fileObj) => {
+              const extension = fileObj.name.split('.').pop().toLowerCase();
+              const isVideo = ['mp4', 'webm', 'mov'].includes(extension);
+              const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension);
+              
+              let mediaElement = '';
+              if (isVideo) {
+                mediaElement = `<video src="${fileObj.url}" controls preload="metadata"></video>`;
+              } else if (isImage) {
+                mediaElement = `<img src="${fileObj.url}" alt="${fileObj.name}" loading="lazy">`;
+              } else {
+                mediaElement = `<div style="height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface-soft); color: var(--primary-dark);">
+                                  <a href="${fileObj.url}" target="_blank" style="text-decoration:none; color:inherit; text-align:center;">
+                                    <span style="font-size:40px; margin-bottom: 5px; display:block;">📄</span>
+                                    <span style="font-size: 12px; font-weight: bold;">Ver Arquivo</span>
+                                  </a>
+                                </div>`;
+              }
+
+              const actions = (currentUserRole === 'coordenador') 
+                  ? `<div class="media-actions">
+                       <button class="action-btn" title="Excluir" onclick="window.deleteMedia(${section.id}, '${fileObj.name}', ${fileObj.isCloud})">🗑</button>
+                     </div>` 
+                  : '';
+
+              return `
+              <div class="media-card">
+                ${mediaElement}
+                <div class="media-info">
+                  <div class="media-name" title="${fileObj.name}">
+                     ${fileObj.isCloud ? '☁️ ' : ''}${fileObj.name}
+                  </div>
+                </div>
+                ${actions}
+              </div>`;
+          }).join('');
       }
   }
 }
 
-// Upload direto para o Cloudinary via Signed/Unsigned Upload Preset
+// Upload direto para o Cloudinary enviando a "tag" necessária
 document.getElementById('uploadMedia')?.addEventListener('change', async (e) => {
   if(e.target.files.length > 0 && currentSectionForGallery !== null) {
       const sectionId = currentSectionForGallery;
@@ -962,34 +981,24 @@ document.getElementById('uploadMedia')?.addEventListener('change', async (e) => 
           if (uploadLabel) uploadLabel.innerHTML = "⏳ Enviando...";
           document.getElementById('uploadMedia').disabled = true;
 
-          const section = sections.find(s => s.id === sectionId);
-          if (!section.cloudMedia) section.cloudMedia = [];
-
           for (let i = 0; i < e.target.files.length; i++) {
               const file = e.target.files[i];
               const formData = new FormData();
               formData.append("file", file);
               formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
               formData.append("folder", `secao_${sectionId}`);
+              
+              // ESSENCIAL: Adiciona a tag para a imagem entrar no .json que o fetch consome
+              formData.append("tags", `secao_${sectionId}`);
 
-              const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
+              await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, {
                   method: "POST",
                   body: formData
               });
-
-              const data = await response.json();
-              if (data.secure_url) {
-                  section.cloudMedia.push({
-                      name: file.name,
-                      url: data.secure_url,
-                      isCloud: true
-                  });
-              }
           }
           
-          saveSectionsToStorage();
-          alert("Upload para o Cloudinary concluído com sucesso!");
-          openGallery(sectionId); 
+          alert("Upload para a nuvem concluído com sucesso!");
+          openGallery(sectionId); // Recarrega a galeria e refaz o fetch atualizado
       } catch (err) {
           console.error("Erro no upload Cloudinary", err);
           alert("Erro ao enviar o arquivo para a nuvem.");
@@ -1001,23 +1010,22 @@ document.getElementById('uploadMedia')?.addEventListener('change', async (e) => 
   }
 });
 
+// Exclusão de arquivos
 window.deleteMedia = async function(sectionId, fileName, isCloud) {
-  if (confirm(`Tem certeza que deseja excluir '${fileName}'?`)) {
+  if (isCloud) {
+      alert("Por segurança do Cloudinary, mídias hospedadas na nuvem só podem ser apagadas fisicamente direto pelo painel de controle deles (Media Library), e não pelo Front-End.");
+      return;
+  }
+
+  if (confirm(`Tem certeza que deseja excluir '${fileName}' da base local?`)) {
       const section = sections.find(s => s.id === sectionId);
       if (!section) return;
 
-      if (isCloud) {
-          section.cloudMedia = section.cloudMedia.filter(m => m.name !== fileName);
+      const index = section.media.indexOf(fileName);
+      if (index > -1) {
+          section.media.splice(index, 1);
           saveSectionsToStorage();
-          alert("Arquivo removido da lista da nuvem.");
           openGallery(sectionId);
-      } else {
-          const index = section.media.indexOf(fileName);
-          if (index > -1) {
-              section.media.splice(index, 1);
-              saveSectionsToStorage();
-              openGallery(sectionId);
-          }
       }
   }
 };
@@ -1082,8 +1090,7 @@ saveNewItemBtn?.addEventListener('click', () => {
           keywords: [title.toLowerCase()],
           highlights: ["Nova seção personalizada"],
           procedures: [],
-          media: [],
-          cloudMedia: []
+          media: []
       });
 
       saveSectionsToStorage();
