@@ -812,6 +812,7 @@ onAuthStateChanged(auth, (user) => {
     if (loginModal) {
     loginModal.classList.remove('active');
     loginModal.style.pointerEvents = 'none'; 
+    loginModal.style.opacity = '0'; // Garante invisibilidade
 }
 
     
@@ -833,6 +834,7 @@ onAuthStateChanged(auth, (user) => {
     if (loginModal) {
         loginModal.classList.add('active');
         loginModal.style.pointerEvents = 'auto'; 
+        loginModal.style.opacity = '1'; 
     }
     
     logoutBtn?.classList.add('hidden');
@@ -840,6 +842,7 @@ onAuthStateChanged(auth, (user) => {
     if (galleryModal?.classList.contains('active')) {
         galleryModal.classList.remove('active');
         galleryModal.style.pointerEvents = 'none';
+        galleryModal.style.opacity = '0'; 
     }
   }
 });
@@ -865,6 +868,7 @@ document.getElementById('closeGalleryBtn')?.addEventListener('click', () => {
   if (galleryModal) {
       galleryModal.classList.remove('active');
       galleryModal.style.pointerEvents = 'none';
+      galleryModal.style.opacity = '0'; // RESOLVE O BUG DO TRAVAMENTO
   }
 });
 
@@ -888,8 +892,10 @@ async function openGallery(sectionId) {
                           <p>Buscando lista na nuvem... ☁️⏳</p>
                         </div>`;
       
+      // Abre o modal e FORÇA A OPACIDADE PARA 1 (isso resolve o invisível!)
       galleryModal.classList.add('active');
       galleryModal.style.pointerEvents = 'auto';
+      galleryModal.style.opacity = '1'; 
 
       let cloudMedia = [];
       try {
@@ -1049,13 +1055,17 @@ openSectionModalBtn?.addEventListener('click', () => {
   }
   // Popula o select de seções existentes para subseções
   targetSectionSelect.innerHTML = sections.map(s => `<option value="${s.id}">${s.id} — ${s.title}</option>`).join('');
+  
+  // ABRE E FORÇA OPACIDADE 1 PARA NÃO FICAR INVISÍVEL
   sectionManagerModal.classList.add('active');
   sectionManagerModal.style.pointerEvents = 'auto';
+  sectionManagerModal.style.opacity = '1';
 });
 
 closeSectionModalBtn?.addEventListener('click', () => {
   sectionManagerModal.classList.remove('active');
   sectionManagerModal.style.pointerEvents = 'none';
+  sectionManagerModal.style.opacity = '0';
 });
 
 actionTypeSelect?.addEventListener('change', (e) => {
@@ -1125,6 +1135,7 @@ saveNewItemBtn?.addEventListener('click', () => {
 
   sectionManagerModal.classList.remove('active');
   sectionManagerModal.style.pointerEvents = 'none';
+  sectionManagerModal.style.opacity = '0';
 });
 
 // ==========================================
